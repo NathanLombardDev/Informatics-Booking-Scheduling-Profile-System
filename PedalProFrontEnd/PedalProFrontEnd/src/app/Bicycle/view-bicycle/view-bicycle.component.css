@@ -1,0 +1,63 @@
+.search-container {
+    display: flex;
+    margin-top: 10px;
+  }
+
+  input[type=text] {
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    width: 50%;
+    background-color: #f1f1f1;
+  }
+
+  button[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+
+  button[type=submit]:hover {
+    background-color: #45a049;
+  }
+
+  #modalBody{
+    text-align: center;
+    border:black 4px solid;
+    border-radius: 12px;
+    background-color: white;
+}
+#continue,#delete{
+    border:black 2px solid;
+}
+
+mat-icon:hover {
+  cursor: pointer;
+}
+
+.circular-button {
+  border-radius: 50%;
+  overflow: hidden;
+  width: 40px; /* Adjust the width and height to your desired size */
+  height: 40px;
+}
+
+.circular-button:hover{
+  cursor: pointer;
+}
+
+.circular-button img {
+  width: 100%; /* Make the image fill the circular boundary */
+  height: 100%; /* Make the image fill the circular boundary */
+  object-fit: cover; /* Preserve the image aspect ratio */
+}
+
+a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+cursor: pointer;
+}

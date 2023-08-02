@@ -1,0 +1,31 @@
+
+
+<div class="container">
+    <mat-icon routerLink="/clientLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    
+    <h2>Account Details</h2>
+  
+    <div class="profile-image">
+      <!-- Replace `path_to_your_profile_image` with the actual image path -->
+      <img src="assets/nature.jpg" alt="Profile Image">
+    </div>
+  
+    <div *ngIf="clientDetails; else loadingTemplate">
+    <p><strong>Title:</strong> {{ clientDetails.clientTitle }}</p>
+    <p><strong>Name:</strong> {{ clientDetails.clientName }}</p>
+      <p><strong>Surname:</strong> {{ clientDetails.clientSurname }}</p>
+      <p><strong>Phone Number:</strong> {{ clientDetails.clientPhoneNum }}</p>
+      <p><strong>Date of birth:</strong> {{ clientDetails.clientDateOfBirth }}</p>
+      <p><strong>Email:</strong> {{ clientDetails.clientEmailAddress }}</p>
+      <!-- Add other properties here as needed -->
+    </div>
+  
+    <!-- Edit button for the entire account details -->
+    <button mat-icon-button class="edit-icon" (click)="openEditDialog()">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+  
+  <ng-template #loadingTemplate>
+    <p class="loading-message">Loading...</p>
+  </ng-template>

@@ -1,0 +1,33 @@
+
+
+#Content,Dialog{
+    background-color: transparent;
+}
+#modalBody{
+    text-align: center;
+    border:black 4px solid;
+    border-radius: 12px;
+    background-color: white;
+}
+#continue,#delete{
+    border:black 2px solid;
+}
+
+#alert{
+    color: red;
+}
+
+.dropdown li{
+    text-align: center;
+}
+.nav-item dropdown{
+    text-align: center;
+}
+
+mat-icon:hover {
+    cursor: pointer;
+  }
+  a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+  cursor: pointer;
+}

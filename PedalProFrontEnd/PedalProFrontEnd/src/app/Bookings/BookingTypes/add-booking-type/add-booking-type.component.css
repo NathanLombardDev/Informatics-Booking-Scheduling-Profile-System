@@ -1,0 +1,7 @@
+mat-icon:hover {
+    cursor: pointer;
+  }
+  a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+  cursor: pointer;
+}

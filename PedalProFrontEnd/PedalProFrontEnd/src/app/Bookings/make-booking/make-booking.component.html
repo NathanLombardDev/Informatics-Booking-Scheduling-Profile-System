@@ -1,0 +1,145 @@
+<nav class="navbar navbar-expand-lg " style="background-color: #F4EEEE;">
+  <a class="navbar-brand" href="#"></a>
+  <img src="assets/CBT.jpg" style="width: 80px; height: 50px;">
+  <div class="container">
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" routerLink="/clientLanding">Home</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bookings
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="nav-link active" aria-current="page" routerLink="/calendar" >Make Booking</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ViewClientBookings">View bookings</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Packages
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="nav-link active" aria-current="page" routerLink="/ViewAvailPackages" >View available packages</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Training Modules
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <div *ngFor="let module of modules; let last=last">
+              <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]" >{{module.trainingModuleName}}</a></li>
+              <li *ngIf="!last"><hr class="dropdown-divider"></li>
+            </div>
+            
+            
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Workouts
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="nav-link active" aria-current="page" routerLink="/Workouts" >View my workouts</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/AddWorkout">Add workout</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Bicycle
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <li><a class="nav-link active" aria-current="page" routerLink="/Bicycle" >View my bicycles</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/AddBicycle">Add bicyle</a></li>
+          </ul>
+        </li>
+        
+      </ul>
+    </div>
+    
+    <mat-icon routerLink="/view-help">help_outline</mat-icon>
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <mat-menu #accountMenu="matMenu">
+      <button mat-menu-item routerLink="/ViewAccount">View Account Details</button>
+      <button mat-menu-item routerLink="/PrintViewIF">View/Print Indemnity Form</button>
+      <button mat-menu-item routerLink="/ClientUploadIF">Upload indemnity form</button>
+    </mat-menu>
+    
+    <div class="circular-button" [matMenuTriggerFor]="accountMenu" aria-label="View Account">
+      <img src="assets/nature.jpg" alt="Image">
+    </div>
+    
+    <a class="navbar-brand" href="#"></a>
+    <a class="navbar-brand" href="#"></a>
+    <a class="nav-link active" aria-current="page" (click)="Logout()" id="logout">Logout</a>
+  </div>
+  
+</nav>
+
+<div class="row">
+    <div class="col-5">
+      
+      
+    </div>
+    <div class="col-6">
+      <br/>
+      <h2>Booking details</h2>
+      <br/>
+      <form #form="ngForm" (ngSubmit)="makeBooking()">
+        <div class="mb-3">
+          <label for="empType" class="form-label" style="font-size: 16px;">Booking Type:</label>
+          <select class="form-select" id="empType" name="empType" [(ngModel)]="addBooking.bookingTypeId" #empType="ngModel" required>
+            <option value="">Select a booking type</option>
+            <option *ngFor="let type of BookingTypes" [value]="type.bookingTypeId">{{ type.bookingTypeName }}</option>
+          </select>
+        </div>
+        <div *ngIf="empType.invalid && (empType.dirty || empType.touched)"
+            class="alert" id="alert">
+            <small *ngIf="empType.errors?.['required']">
+              <span>*Employee type is required!</span>
+            </small>
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="margin-right: 6px;">Submit</button>
+        <button type="button" class="btn btn-danger" (click)="cancel_continue()">Cancel</button>
+      </form>
+    </div>
+
+    <div class="col-1">
+
+    </div>
+
+    <div class="modal" id="myModal" style="display: none;" >
+      <div class="modal-dialog" id="Dialog">
+        <div class="modal-content" id="Content">
+          
+          <div class="modal-body" id="modalBody">
+            <h4>Your booking has been made</h4>
+            <br/>
+            <button type="button" class="btn btn-success" (click)="cancel_continue()" id="continue">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+

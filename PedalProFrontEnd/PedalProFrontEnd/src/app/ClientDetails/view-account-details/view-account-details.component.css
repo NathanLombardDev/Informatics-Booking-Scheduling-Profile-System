@@ -1,0 +1,69 @@
+/* account-details.component.css */
+
+/* ... (previously defined styles) */
+
+
+.container {
+    text-align: center; /* Center the content horizontally */
+    max-width: 400px;
+    margin: 20px auto; /* Center the container itself */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px; /* Add padding for better spacing */
+    position: relative; /* Set the container as relative for absolute positioning */
+  }
+  
+  h2 {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* If you want a border around the image */
+    border: 3px solid black;
+    margin: 0 auto 10px; /* Center the image within the container and add margin at the bottom */
+  }
+
+  .profile-image:hover {border: 3px solid #39eb0d;}
+  
+  .profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Edit button for the entire account details */
+  .edit-icon {
+    background-color: black;
+    color: #fff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto; /* Push the button to the right */
+  }
+  
+  .edit-icon:hover {
+    background-color: #39eb0d;
+  }
+  
+  .edit-icon mat-icon {
+    font-size: 20px;
+  }
+
+#back{
+    text-align: left;
+}
+  
+  mat-icon:hover {
+    cursor: pointer;
+    
+  }

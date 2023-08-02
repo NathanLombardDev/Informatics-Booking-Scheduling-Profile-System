@@ -1,0 +1,152 @@
+Copy code
+.calendar {
+  text-align: center;
+  margin: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: black; /* Set the background color to black */
+  color: white; /* Set the text color to white */
+}
+
+.h1 {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: green; /* Set the month name color to green */
+}
+
+.day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-weight: bold;
+}
+
+.day-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border: 1px solid #ccc;
+  background-color: #111; /* Set the day name background color to a darker shade of black */
+  color: white;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 5px;
+  position: relative;
+}
+
+.day.disabled {
+  background-color: #111; /* Set the disabled day background color to a darker shade of black */
+  color: #666; /* Set the disabled day text color to a lighter shade of white */
+}
+
+.day:hover {
+  background-color: #222; /* Set the hover background color to a darker shade of black */
+  color: white;
+}
+
+.day-number {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.navigation-buttons {
+  margin-top: 10px;
+}
+
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.timeslots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.timeslot {
+  padding: 5px;
+  background-color: black;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 2px solid green;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: fit-content;
+  margin-bottom: 5px;
+}
+
+.timeslot:hover {
+  background-color: #222;
+}
+
+.navigation-buttons {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-button {
+  background-color: green; /* Set the navigation button background color to green */
+  color: white; /* Set the navigation button text color to white */
+  margin: 5px; /* Add some spacing around the navigation buttons */
+  border: black,2px,solid; /* Remove the default button border */
+  cursor: pointer;
+  font-size: 20px;
+  height: fit-content;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-button:hover {
+  background-color: #0a5; /* Set the hover background color to a darker shade of green */
+}
+
+.no-timeslots {
+  padding: 5px;
+  background-color: #888; /* Set the background color for the "No available timeslots" message */
+  color: white; /* Set the text color for the "No available timeslots" message */
+  border-radius: 5px; /* Add rounded corners to the message */
+  text-align: center;
+}
+
+mat-icon:hover {
+  cursor: pointer;
+}
+a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+cursor: pointer;
+}
+
+  

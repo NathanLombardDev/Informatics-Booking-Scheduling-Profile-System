@@ -1,0 +1,10 @@
+.form-group{
+    text-align: center;
+}
+h2{
+    text-align: center;
+}
+mat-icon:hover {
+    cursor: pointer;
+    
+  }

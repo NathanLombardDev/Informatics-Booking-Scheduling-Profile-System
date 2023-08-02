@@ -1,0 +1,27 @@
+input{
+    max-width: fit-content;
+}
+
+#Content,Dialog{
+    background-color: transparent;
+}
+#modalBody{
+    text-align: center;
+    border:black 4px solid;
+    border-radius: 12px;
+    background-color: white;
+}
+#continue{
+    border:black 2px solid;
+}
+
+#alert{
+    color: red;
+}
+mat-icon:hover {
+    cursor: pointer;
+  }
+  a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+  cursor: pointer;
+}

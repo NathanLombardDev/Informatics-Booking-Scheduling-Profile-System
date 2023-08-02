@@ -1,0 +1,83 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .card-text {
+    font-size: 1rem;
+  }
+  
+  .embed-responsive {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 10px solid green; /* Add border to the video container */
+    border-radius: 8px; /* Rounded corners for the video container */
+  }
+  
+  .embed-responsive::before {
+    display: block;
+    content: "";
+  }
+  
+  .embed-responsive .embed-responsive-item,
+  .embed-responsive iframe,
+  .embed-responsive embed,
+  .embed-responsive object,
+  .embed-responsive video {
+    position: absolute;
+    top: 50%; /* Center the video vertically */
+    left: 50%; /* Center the video horizontally */
+    transform: translate(-50%, -50%); /* Center the video in the middle */
+    width: 100%;
+    height: 100%;
+    border: 10px solid black; /* Add border to the video itself */
+    border-radius: 8px; /* Rounded corners for the video */
+  }
+  
+  /* Adjust the size of the card and video if needed */
+  .card-body {
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .embed-responsive {
+    height: 300px; /* Set the height of the video container */
+  }
+
+  mat-icon:hover {
+    cursor: pointer;
+  }
+
+  .circular-button {
+    border-radius: 50%;
+    overflow: hidden;
+    width: 40px; /* Adjust the width and height to your desired size */
+    height: 40px;
+  }
+
+  .circular-button:hover{
+    cursor: pointer;
+  }
+  
+  .circular-button img {
+    width: 100%; /* Make the image fill the circular boundary */
+    height: 100%; /* Make the image fill the circular boundary */
+    object-fit: cover; /* Preserve the image aspect ratio */
+  }
+  
+  a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+  cursor: pointer;
+}

@@ -1,0 +1,65 @@
+body {
+    background-color: black;
+}
+
+input {
+    max-width: fit-content;
+}
+
+.main-content h2, .main-content .login-container {
+    text-align: center;
+    color: black; /* Change the color to match the theme */
+}
+
+.login-container {
+    color: white; /* Change the text color to match the theme */
+    text-align: center;
+}
+
+.login-form {
+    margin-top: 20px;
+    text-align: center;
+    
+}
+
+.login-form div {
+    margin-bottom: 10px;
+}
+
+.login-form label {
+    display: block;
+    color: black; /* Change the label color if needed */
+}
+
+.login-form input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-form button {
+    margin-top: 10px;
+    background-color: green; /* Change the background color to match the theme */
+    color: white;
+    border: 1px solid black;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-form button:hover {
+    background-color:green ; /* Change the hover background color to match the theme */
+}
+
+.forgot-button {
+    background: none;
+    border: none;
+    color: black;
+    text-decoration: underline;
+    cursor: pointer;
+}
+mat-icon:hover {
+    cursor: pointer;
+    
+  }

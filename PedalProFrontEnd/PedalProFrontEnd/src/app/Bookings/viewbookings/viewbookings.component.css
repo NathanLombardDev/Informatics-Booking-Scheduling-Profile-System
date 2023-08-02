@@ -1,0 +1,25 @@
+mat-icon:hover {
+  cursor: pointer;
+}
+
+.circular-button {
+  border-radius: 50%;
+  overflow: hidden;
+  width: 40px; /* Adjust the width and height to your desired size */
+  height: 40px;
+}
+
+.circular-button:hover{
+  cursor: pointer;
+}
+
+.circular-button img {
+  width: 100%; /* Make the image fill the circular boundary */
+  height: 100%; /* Make the image fill the circular boundary */
+  object-fit: cover; /* Preserve the image aspect ratio */
+}
+
+a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+cursor: pointer;
+}

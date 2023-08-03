@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3fPC+2yxWrQTqR83vnQ4HKHWCT8G0zj6+dXZT9I3pPVBut/JPEyWCXnGFnOrKjz7yj2REyMDiyRXr8VMIzUftg==",
+  "dgSpecHash": "FG5YYKk7sm1DXI7UHFwtdzgcSh2YXeNSN+msJodcr5dzSqYE5ZYvJ7SK9YUjrhL/mESE5lLtjVrIkVjtfBX2HA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
+  "projectFilePath": "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\lompi\\.nuget\\packages\\bouncycastle.cryptography\\2.1.1\\bouncycastle.cryptography.2.1.1.nupkg.sha512",
     "C:\\Users\\lompi\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",

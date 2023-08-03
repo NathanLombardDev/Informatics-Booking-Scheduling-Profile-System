@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj": {}
+    "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj": {
+    "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
+        "projectUniqueName": "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
         "projectName": "PedalProAPI",
-        "projectPath": "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
+        "projectPath": "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\PedalProAPI.csproj",
         "packagesPath": "C:\\Users\\lompi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\lompi\\OneDrive\\Documents\\University\\Year 4\\Year\\INF 370\\PedalPro\\PedalProBackend\\PedalProAPI\\obj\\",
+        "outputPath": "C:\\Users\\lompi\\OneDrive\\Documents\\NathanLombardDeveloper\\Github\\PedalPro\\Informatics-Booking-Scheduling-Profile-System\\PedalProBackend\\PedalProAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

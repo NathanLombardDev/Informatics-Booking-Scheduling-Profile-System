@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PedalProAPI.Migrations
 {
-    public partial class @new : Migration
+    public partial class New : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -234,20 +234,6 @@ namespace PedalProAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Package",
-                columns: table => new
-                {
-                    Package_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PackageName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
-                    PackageDescription = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Package", x => x.Package_ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Payment",
                 columns: table => new
                 {
@@ -302,17 +288,16 @@ namespace PedalProAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Timeslot",
+                name: "TimeslotStatus",
                 columns: table => new
                 {
-                    Timeslot_ID = table.Column<int>(type: "int", nullable: false)
+                    TimeslotStatus_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    TimeslotStatusName = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Timeslot", x => x.Timeslot_ID);
+                    table.PrimaryKey("PK_TimeslotStatus", x => x.TimeslotStatus_ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -608,109 +593,24 @@ namespace PedalProAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Cart",
+                name: "Timeslot",
                 columns: table => new
                 {
-                    Cart_ID = table.Column<int>(type: "int", nullable: false)
+                    Timeslot_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CartQuantity = table.Column<int>(type: "int", nullable: true),
-                    CartAmount = table.Column<double>(type: "float", nullable: true),
-                    CartStatus_ID = table.Column<int>(type: "int", nullable: true),
-                    Payment_ID = table.Column<int>(type: "int", nullable: true),
-                    Package_ID = table.Column<int>(type: "int", nullable: true)
+                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TimeslotStatus_ID = table.Column<int>(type: "int", nullable: true),
+                    TrainingModuleStatusId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Cart", x => x.Cart_ID);
+                    table.PrimaryKey("PK_Timeslot", x => x.Timeslot_ID);
                     table.ForeignKey(
-                        name: "FK_Cart_CartStatus_CartStatus_ID",
-                        column: x => x.CartStatus_ID,
-                        principalTable: "CartStatus",
-                        principalColumn: "CartStatus_ID");
-                    table.ForeignKey(
-                        name: "FK_Cart_Package_Package_ID",
-                        column: x => x.Package_ID,
-                        principalTable: "Package",
-                        principalColumn: "Package_ID");
-                    table.ForeignKey(
-                        name: "FK_Cart_Payment_Payment_ID",
-                        column: x => x.Payment_ID,
-                        principalTable: "Payment",
-                        principalColumn: "Payment_ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PackagePrice",
-                columns: table => new
-                {
-                    PackagePrice_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Package_ID = table.Column<int>(type: "int", nullable: true),
-                    Price_ID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PackagePrice", x => x.PackagePrice_ID);
-                    table.ForeignKey(
-                        name: "FK_PackagePrice_Package_Package_ID",
-                        column: x => x.Package_ID,
-                        principalTable: "Package",
-                        principalColumn: "Package_ID");
-                    table.ForeignKey(
-                        name: "FK_PackagePrice_Price_Price_ID",
-                        column: x => x.Price_ID,
-                        principalTable: "Price",
-                        principalColumn: "Price_ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DateSlot",
-                columns: table => new
-                {
-                    DateSlot_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Timeslot_ID = table.Column<int>(type: "int", nullable: true),
-                    Date_ID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DateSlot", x => x.DateSlot_ID);
-                    table.ForeignKey(
-                        name: "FK_DateSlot_Date_Date_ID",
-                        column: x => x.Date_ID,
-                        principalTable: "Date",
-                        principalColumn: "Date_ID");
-                    table.ForeignKey(
-                        name: "FK_DateSlot_Timeslot_Timeslot_ID",
-                        column: x => x.Timeslot_ID,
-                        principalTable: "Timeslot",
-                        principalColumn: "Timeslot_ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TrainingModule",
-                columns: table => new
-                {
-                    TrainingModule_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TrainingModuleName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
-                    TrainingModuleDescription = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    Package_ID = table.Column<int>(type: "int", nullable: true),
-                    TrainingModuleStatus_ID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TrainingModule", x => x.TrainingModule_ID);
-                    table.ForeignKey(
-                        name: "FK_TrainingModule_Package_Package_ID",
-                        column: x => x.Package_ID,
-                        principalTable: "Package",
-                        principalColumn: "Package_ID");
-                    table.ForeignKey(
-                        name: "FK_TrainingModule_TrainingModuleStatus_TrainingModuleStatus_ID",
-                        column: x => x.TrainingModuleStatus_ID,
-                        principalTable: "TrainingModuleStatus",
-                        principalColumn: "TrainingModuleStatus_ID");
+                        name: "FK_Timeslot_TimeslotStatus_TrainingModuleStatusId",
+                        column: x => x.TrainingModuleStatusId,
+                        principalTable: "TimeslotStatus",
+                        principalColumn: "TimeslotStatus_ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -751,30 +651,6 @@ namespace PedalProAPI.Migrations
                         column: x => x.Client_ID,
                         principalTable: "Client",
                         principalColumn: "ClientID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ClientPackage",
-                columns: table => new
-                {
-                    ClientPackage = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Package_ID = table.Column<int>(type: "int", nullable: true),
-                    ClientID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ClientPackage", x => x.ClientPackage);
-                    table.ForeignKey(
-                        name: "FK_ClientPackage_Client_ClientID",
-                        column: x => x.ClientID,
-                        principalTable: "Client",
-                        principalColumn: "ClientID");
-                    table.ForeignKey(
-                        name: "FK_ClientPackage_Package_Package_ID",
-                        column: x => x.Package_ID,
-                        principalTable: "Package",
-                        principalColumn: "Package_ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -843,59 +719,27 @@ namespace PedalProAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Checkout",
+                name: "DateSlot",
                 columns: table => new
                 {
-                    Checkout_ID = table.Column<int>(type: "int", nullable: false)
+                    DateSlot_ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CheckoutStatus_ID = table.Column<int>(type: "int", nullable: true),
-                    Payment_ID = table.Column<int>(type: "int", nullable: true),
-                    Cart_ID = table.Column<int>(type: "int", nullable: true)
+                    Timeslot_ID = table.Column<int>(type: "int", nullable: true),
+                    Date_ID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Checkout", x => x.Checkout_ID);
+                    table.PrimaryKey("PK_DateSlot", x => x.DateSlot_ID);
                     table.ForeignKey(
-                        name: "FK_Checkout_Cart_Cart_ID",
-                        column: x => x.Cart_ID,
-                        principalTable: "Cart",
-                        principalColumn: "Cart_ID");
+                        name: "FK_DateSlot_Date_Date_ID",
+                        column: x => x.Date_ID,
+                        principalTable: "Date",
+                        principalColumn: "Date_ID");
                     table.ForeignKey(
-                        name: "FK_Checkout_CheckoutStatus_CheckoutStatus_ID",
-                        column: x => x.CheckoutStatus_ID,
-                        principalTable: "CheckoutStatus",
-                        principalColumn: "CheckoutStatus_ID");
-                    table.ForeignKey(
-                        name: "FK_Checkout_Payment_Payment_ID",
-                        column: x => x.Payment_ID,
-                        principalTable: "Payment",
-                        principalColumn: "Payment_ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TrainingMaterial",
-                columns: table => new
-                {
-                    TrainingMaterial_ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TrainingMaterialName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
-                    Content = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
-                    VideoLink_ID = table.Column<int>(type: "int", nullable: true),
-                    TrainingModule_ID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TrainingMaterial", x => x.TrainingMaterial_ID);
-                    table.ForeignKey(
-                        name: "FK_TrainingMaterial_TrainingModule_TrainingModule_ID",
-                        column: x => x.TrainingModule_ID,
-                        principalTable: "TrainingModule",
-                        principalColumn: "TrainingModule_ID");
-                    table.ForeignKey(
-                        name: "FK_TrainingMaterial_VideoLink_VideoLink_ID",
-                        column: x => x.VideoLink_ID,
-                        principalTable: "VideoLink",
-                        principalColumn: "VideoLink_ID");
+                        name: "FK_DateSlot_Timeslot_Timeslot_ID",
+                        column: x => x.Timeslot_ID,
+                        principalTable: "Timeslot",
+                        principalColumn: "Timeslot_ID");
                 });
 
             migrationBuilder.CreateTable(
@@ -1158,6 +1002,177 @@ namespace PedalProAPI.Migrations
                         principalColumn: "RefundReason_ID");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Cart",
+                columns: table => new
+                {
+                    Cart_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CartQuantity = table.Column<int>(type: "int", nullable: true),
+                    CartAmount = table.Column<double>(type: "float", nullable: true),
+                    CartStatus_ID = table.Column<int>(type: "int", nullable: true),
+                    Package_ID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cart", x => x.Cart_ID);
+                    table.ForeignKey(
+                        name: "FK_Cart_CartStatus_CartStatus_ID",
+                        column: x => x.CartStatus_ID,
+                        principalTable: "CartStatus",
+                        principalColumn: "CartStatus_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Checkout",
+                columns: table => new
+                {
+                    Checkout_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CheckoutStatus_ID = table.Column<int>(type: "int", nullable: true),
+                    Payment_ID = table.Column<int>(type: "int", nullable: true),
+                    Cart_ID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Checkout", x => x.Checkout_ID);
+                    table.ForeignKey(
+                        name: "FK_Checkout_Cart_Cart_ID",
+                        column: x => x.Cart_ID,
+                        principalTable: "Cart",
+                        principalColumn: "Cart_ID");
+                    table.ForeignKey(
+                        name: "FK_Checkout_CheckoutStatus_CheckoutStatus_ID",
+                        column: x => x.CheckoutStatus_ID,
+                        principalTable: "CheckoutStatus",
+                        principalColumn: "CheckoutStatus_ID");
+                    table.ForeignKey(
+                        name: "FK_Checkout_Payment_Payment_ID",
+                        column: x => x.Payment_ID,
+                        principalTable: "Payment",
+                        principalColumn: "Payment_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Package",
+                columns: table => new
+                {
+                    Package_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PackageName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
+                    PackageDescription = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
+                    CartId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Package", x => x.Package_ID);
+                    table.ForeignKey(
+                        name: "FK_Package_Cart_CartId",
+                        column: x => x.CartId,
+                        principalTable: "Cart",
+                        principalColumn: "Cart_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ClientPackage",
+                columns: table => new
+                {
+                    ClientPackage = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Package_ID = table.Column<int>(type: "int", nullable: true),
+                    ClientID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClientPackage", x => x.ClientPackage);
+                    table.ForeignKey(
+                        name: "FK_ClientPackage_Client_ClientID",
+                        column: x => x.ClientID,
+                        principalTable: "Client",
+                        principalColumn: "ClientID");
+                    table.ForeignKey(
+                        name: "FK_ClientPackage_Package_Package_ID",
+                        column: x => x.Package_ID,
+                        principalTable: "Package",
+                        principalColumn: "Package_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PackagePrice",
+                columns: table => new
+                {
+                    PackagePrice_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Package_ID = table.Column<int>(type: "int", nullable: true),
+                    Price_ID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PackagePrice", x => x.PackagePrice_ID);
+                    table.ForeignKey(
+                        name: "FK_PackagePrice_Package_Package_ID",
+                        column: x => x.Package_ID,
+                        principalTable: "Package",
+                        principalColumn: "Package_ID");
+                    table.ForeignKey(
+                        name: "FK_PackagePrice_Price_Price_ID",
+                        column: x => x.Price_ID,
+                        principalTable: "Price",
+                        principalColumn: "Price_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainingModule",
+                columns: table => new
+                {
+                    TrainingModule_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TrainingModuleName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
+                    TrainingModuleDescription = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
+                    Package_ID = table.Column<int>(type: "int", nullable: true),
+                    TrainingModuleStatus_ID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainingModule", x => x.TrainingModule_ID);
+                    table.ForeignKey(
+                        name: "FK_TrainingModule_Package_Package_ID",
+                        column: x => x.Package_ID,
+                        principalTable: "Package",
+                        principalColumn: "Package_ID");
+                    table.ForeignKey(
+                        name: "FK_TrainingModule_TrainingModuleStatus_TrainingModuleStatus_ID",
+                        column: x => x.TrainingModuleStatus_ID,
+                        principalTable: "TrainingModuleStatus",
+                        principalColumn: "TrainingModuleStatus_ID");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainingMaterial",
+                columns: table => new
+                {
+                    TrainingMaterial_ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TrainingMaterialName = table.Column<string>(type: "varchar(10)", unicode: false, maxLength: 10, nullable: true),
+                    Content = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true),
+                    VideoLink_ID = table.Column<int>(type: "int", nullable: true),
+                    TrainingModule_ID = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainingMaterial", x => x.TrainingMaterial_ID);
+                    table.ForeignKey(
+                        name: "FK_TrainingMaterial_TrainingModule_TrainingModule_ID",
+                        column: x => x.TrainingModule_ID,
+                        principalTable: "TrainingModule",
+                        principalColumn: "TrainingModule_ID");
+                    table.ForeignKey(
+                        name: "FK_TrainingMaterial_VideoLink_VideoLink_ID",
+                        column: x => x.VideoLink_ID,
+                        principalTable: "VideoLink",
+                        principalColumn: "VideoLink_ID");
+                });
+
             migrationBuilder.InsertData(
                 table: "BookingStatus",
                 columns: new[] { "BookingStatus_ID", "BookingStatusName" },
@@ -1179,6 +1194,15 @@ namespace PedalProAPI.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "CartStatus",
+                columns: new[] { "CartStatus_ID", "CartStatusName" },
+                values: new object[,]
+                {
+                    { 1, "Empty" },
+                    { 2, "Full" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "ClientType",
                 columns: new[] { "ClientType_ID", "ClientTypeName" },
                 values: new object[,]
@@ -1192,6 +1216,16 @@ namespace PedalProAPI.Migrations
                 table: "EmployeeStatus",
                 columns: new[] { "EmpStatus_ID", "EmpStatusName" },
                 values: new object[] { 1, "Available" });
+
+            migrationBuilder.InsertData(
+                table: "FeedbackCategory",
+                columns: new[] { "FeedbackCategory_ID", "FeedbackCategoryName" },
+                values: new object[,]
+                {
+                    { 1, "Usability" },
+                    { 2, "Support" },
+                    { 3, "Service" }
+                });
 
             migrationBuilder.InsertData(
                 table: "HELPCategory",
@@ -1217,8 +1251,17 @@ namespace PedalProAPI.Migrations
 
             migrationBuilder.InsertData(
                 table: "Package",
-                columns: new[] { "Package_ID", "PackageDescription", "PackageName" },
-                values: new object[] { 1, "The base package", "Platinum" });
+                columns: new[] { "Package_ID", "CartId", "PackageDescription", "PackageName" },
+                values: new object[] { 1, null, "The base package", "Platinum" });
+
+            migrationBuilder.InsertData(
+                table: "TimeslotStatus",
+                columns: new[] { "TimeslotStatus_ID", "TimeslotStatusName" },
+                values: new object[,]
+                {
+                    { 1, "Available" },
+                    { 2, "Booked" }
+                });
 
             migrationBuilder.InsertData(
                 table: "TrainingModuleStatus",
@@ -1335,11 +1378,6 @@ namespace PedalProAPI.Migrations
                 column: "Package_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cart_Payment_ID",
-                table: "Cart",
-                column: "Payment_ID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Checkout_Cart_ID",
                 table: "Checkout",
                 column: "Cart_ID");
@@ -1425,6 +1463,11 @@ namespace PedalProAPI.Migrations
                 column: "HelpCategory_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Package_CartId",
+                table: "Package",
+                column: "CartId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PackagePrice_Package_ID",
                 table: "PackagePrice",
                 column: "Package_ID");
@@ -1505,6 +1548,11 @@ namespace PedalProAPI.Migrations
                 column: "Setup_ID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Timeslot_TrainingModuleStatusId",
+                table: "Timeslot",
+                column: "TrainingModuleStatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TrainingMaterial_TrainingModule_ID",
                 table: "TrainingMaterial",
                 column: "TrainingModule_ID");
@@ -1543,10 +1591,25 @@ namespace PedalProAPI.Migrations
                 name: "IX_Workout_WorkoutType_ID",
                 table: "Workout",
                 column: "WorkoutType_ID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Cart_Package_Package_ID",
+                table: "Cart",
+                column: "Package_ID",
+                principalTable: "Package",
+                principalColumn: "Package_ID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Cart_CartStatus_CartStatus_ID",
+                table: "Cart");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Cart_Package_Package_ID",
+                table: "Cart");
+
             migrationBuilder.DropTable(
                 name: "Administrator");
 
@@ -1611,10 +1674,10 @@ namespace PedalProAPI.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Cart");
+                name: "CheckoutStatus");
 
             migrationBuilder.DropTable(
-                name: "CheckoutStatus");
+                name: "Payment");
 
             migrationBuilder.DropTable(
                 name: "FeedbackCategory");
@@ -1641,12 +1704,6 @@ namespace PedalProAPI.Migrations
                 name: "WorkoutType");
 
             migrationBuilder.DropTable(
-                name: "CartStatus");
-
-            migrationBuilder.DropTable(
-                name: "Payment");
-
-            migrationBuilder.DropTable(
                 name: "BookingStatus");
 
             migrationBuilder.DropTable(
@@ -1654,9 +1711,6 @@ namespace PedalProAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Schedule");
-
-            migrationBuilder.DropTable(
-                name: "Package");
 
             migrationBuilder.DropTable(
                 name: "TrainingModuleStatus");
@@ -1698,6 +1752,9 @@ namespace PedalProAPI.Migrations
                 name: "Bicycle");
 
             migrationBuilder.DropTable(
+                name: "TimeslotStatus");
+
+            migrationBuilder.DropTable(
                 name: "BicycleBrand");
 
             migrationBuilder.DropTable(
@@ -1717,6 +1774,15 @@ namespace PedalProAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "ImageType");
+
+            migrationBuilder.DropTable(
+                name: "CartStatus");
+
+            migrationBuilder.DropTable(
+                name: "Package");
+
+            migrationBuilder.DropTable(
+                name: "Cart");
         }
     }
 }

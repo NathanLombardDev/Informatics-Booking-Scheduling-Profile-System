@@ -77,6 +77,9 @@
         </ul>
       </div>
       
+      <small>{{cartnumber}}</small>
+      <mat-icon routerLink="/ViewCart">shopping_cart</mat-icon>
+      <a class="navbar-brand" href="#"></a>
       <mat-icon routerLink="/view-help">help_outline</mat-icon>
       <a class="navbar-brand" href="#"></a>
       <a class="navbar-brand" href="#"></a>
@@ -113,7 +116,14 @@
                 <li class="titleName">Name: {{this.GetPackageName(help.packageId)}}</li>
                 <li class="titleValue">R{{this.GetPriceAmount(help.priceId)}}</li>
                 <li></li>
+                <li></li>
+                <li></li>
+                <li><button mat-icon-button (click)="addtoCart(help.packageId)">
+                  
+                  <mat-icon>shopping_cart</mat-icon>
+                </button></li>
               </ul>
+              
             </summary>
             <div class="content">
               <p>Description: {{this.GetPackageDescription(help.packageId)}}

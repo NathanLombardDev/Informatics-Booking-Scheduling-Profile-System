@@ -559,8 +559,24 @@ namespace PedalProAPI.Repositories
 
 
         //FeedbackCategory
-        
-       
+
+
+
+        //Cart
+        public async Task<Cart> GetCartOne(int cartId)
+        {
+            IQueryable<Cart> query = _pedalProDbContext.Carts.Where(c => c.CartId == cartId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<Cart> GetCartWithPackages(int cartId)
+        {
+            IQueryable<Cart> query = _pedalProDbContext.Carts
+                .Include(c => c.Packages) // Include related packages
+                .Where(c => c.CartId == cartId);
+
+            return await query.FirstOrDefaultAsync();
+        }
 
     }
 }

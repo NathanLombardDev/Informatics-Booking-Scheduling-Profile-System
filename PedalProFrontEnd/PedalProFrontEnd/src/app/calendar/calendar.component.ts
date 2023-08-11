@@ -53,16 +53,16 @@ export class CalendarComponent implements OnInit{
 
   updateCalendar(): void {
     const daysInMonth = this.getDaysInMonth(this.currentMonth);
-
+  
     // Fetch timeslots for each day in the current month
     this.calendarData = daysInMonth.map((day) => ({
       ...day,
       timeslots: []
     }));
-
+  
     // Set day names in the correct order for the current month
     this.dayNames = this.getOrderedDayNames(this.currentMonth);
-
+  
     this.calendarData.forEach((day, index) => {
       if (day.isCurrentMonth) {
         const currentDate = new Date(this.currentMonth);
@@ -70,7 +70,7 @@ export class CalendarComponent implements OnInit{
         day.date = currentDate;
         this.service.getTimeslotsTwo(day.formattedDate).subscribe(
           (timeslots: Timeslot[]) => {
-            day.timeslots = timeslots;
+            day.timeslots = timeslots.sort((a, b) => this.compareTimes(a.startTime, b.startTime));
           },
           (error) => {
             // Handle error if necessary
@@ -78,6 +78,12 @@ export class CalendarComponent implements OnInit{
         );
       }
     });
+  }
+  
+  compareTimes(timeA: string, timeB: string): number {
+    const dateA = new Date(`1970-01-01T${timeA}`);
+    const dateB = new Date(`1970-01-01T${timeB}`);
+    return dateA.getTime() - dateB.getTime();
   }
 
   getOrderedDayNames(month: Date): string[] {

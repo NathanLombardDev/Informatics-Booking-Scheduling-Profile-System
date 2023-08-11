@@ -21,6 +21,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(
     }));
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

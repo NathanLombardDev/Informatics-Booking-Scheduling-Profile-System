@@ -22,6 +22,8 @@ export class AddTimeslotComponent implements OnInit{
     timeslotId:0
   };
 
+  employees:Employee[]=[];
+
   constructor(private service: PedalProServiceService,private router:Router) { }
 
   createTimeslot() {
@@ -34,19 +36,23 @@ export class AddTimeslotComponent implements OnInit{
       });
   }
   
-  
-  ngOnInit(): void {
-    
+  GetModules(){
+    this.service.GetEmployeesTwo().subscribe(result=>{
+      let moduleList:any[]=result
+      moduleList.forEach((element)=>{
+        this.employees.push(element)
+      });
+    })
+    return this.employees;
   }
   
-  
-  
-  
 
-  
+  ngOnInit(): void {
+    this.GetModules();
+  }
 
   cancel_continue() {
-    this.router.navigate(['/companyLanding']);
+    this.router.navigate(['/ViewSchedule']);
   }
 
   // modal pop-up

@@ -17,8 +17,8 @@ namespace PedalProAPI.Models
         [Column("CartStatus_ID")]
         public int? CartStatusId { get; set; }
 
-        [Column("Payment_ID")]
-        public int? PaymentId { get; set; }
+        /*[Column("Payment_ID")]
+        public int? PaymentId { get; set; }*/
 
         [Column("Package_ID")]
         public int? PackageId { get; set; }
@@ -36,8 +36,10 @@ namespace PedalProAPI.Models
         //[InverseProperty("Carts")]
         public virtual Package? Package { get; set; }
 
-        [ForeignKey("PaymentId")]
+        public virtual ICollection<Package> Packages { get; set; } = new List<Package>(); // One-to-Many relationship
+
+        /*([ForeignKey("PaymentId")]
         //[InverseProperty("Carts")]
-        public virtual Payment? Payment { get; set; }
+        public virtual Payment? Payment { get; set; }*/
     }
 }

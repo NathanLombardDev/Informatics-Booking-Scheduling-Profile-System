@@ -17,6 +17,19 @@ namespace PedalProAPI.Models
         //[Column(TypeName = "datetime")]
         public string? EndTime { get; set; }
 
+
+        [Column("TimeslotStatus_ID")]
+        public int? TimeslotStatusId { get; set; }
+
+        /*
+        [InverseProperty("TrainingModule")]
+        public virtual ICollection<TrainingMaterial> TrainingMaterials { get; set; } = new List<TrainingMaterial>();
+        */
+
+        [ForeignKey("TrainingModuleStatusId")]
+        //[InverseProperty("TrainingModules")]
+        public virtual TimeslotStatus? TimeslotStatus { get; set; }
+
         /*
         [InverseProperty("Timeslot")]
         public virtual ICollection<DateSlot> DateSlots { get; set; } = new List<DateSlot>();

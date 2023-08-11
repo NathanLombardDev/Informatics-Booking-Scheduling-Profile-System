@@ -182,8 +182,11 @@
                 <input type="time" class="form-control" id="endTime" [(ngModel)]="dateWithTimeslotDto.endTime" name="endTime" required>
               </div>
               <div class="form-group">
-                <label for="employeeId">Employee ID:</label>
-                <input type="number" class="form-control" id="employeeId" [(ngModel)]="dateWithTimeslotDto.employeeId" name="employeeId" required>
+                <label for="employeeId">Assign employee:</label>
+                <select class="form-select" id="moduleModule" name="moduleModule" [(ngModel)]="dateWithTimeslotDto.employeeId" #moduleModule="ngModel" required>
+              <option value="">Select an employee</option>
+              <option *ngFor="let module of employees" [value]="module.employeeId">{{ module.empName }}</option>
+              </select>
               </div>
               <br/>
               <button type="submit" class="btn btn-primary">Create Timeslot</button>

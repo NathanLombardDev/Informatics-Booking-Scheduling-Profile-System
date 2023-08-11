@@ -210,5 +210,10 @@ namespace PedalProAPI.Repositories
         Task<FeedbackCategory[]> GetAllFeedbackCategoriesAsync();
         Task<FeedbackCategory> GetFeedbackCategoryAsync(int feedbackcategoryId);
 
+
+        //Cart
+        Task<Cart> GetCartOne(int cartId);
+        Task<Cart> GetCartWithPackages(int cartId);
+
     }
 }

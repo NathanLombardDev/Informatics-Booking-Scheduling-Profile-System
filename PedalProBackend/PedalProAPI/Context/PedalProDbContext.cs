@@ -114,6 +114,8 @@ namespace PedalProAPI.Context
         public virtual DbSet<IndemnityForm> IndemnityForms { get; set; }
         public DbSet<ClientIndemnityForm> ClientIndemnityForms { get; set; }
 
+        public DbSet<TimeslotStatus> TimeslotStatuses { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -169,10 +171,24 @@ namespace PedalProAPI.Context
             modelBuilder.Entity<HelpCategory>().HasData(new { HelpCategoryId = 4, HelpCategoryName = "Workout" });
 
             //Feedback Catergory
-            /*modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 1, FeedbackCategoryName = "Usability issue" });
-            modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 2, FeedbackCategoryName = "Good Support" });
+            modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 1, FeedbackCategoryName = "Usability" });
+            modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 2, FeedbackCategoryName = "Support" });
             modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 3, FeedbackCategoryName = "Service" });
-            modelBuilder.Entity<FeedbackCategory>().HasData(new { FeedbackCategoryId = 4, FeedbackCategoryName = "Bad Support" });*/
+            
+
+
+            //Timeslot status
+            modelBuilder.Entity<TimeslotStatus>().HasData(new { TimeslotStatusId = 1, TimeslotStatusName = "Available" });
+            modelBuilder.Entity<TimeslotStatus>().HasData(new { TimeslotStatusId = 2, TimeslotStatusName = "Booked" });
+
+
+
+
+            //Cart status
+            modelBuilder.Entity<CartStatus>().HasData(new { CartStatusId = 1, CartStatusName = "Empty" });
+            modelBuilder.Entity<CartStatus>().HasData(new { CartStatusId = 2, CartStatusName = "Full" });
+
+
         }
     }
 }

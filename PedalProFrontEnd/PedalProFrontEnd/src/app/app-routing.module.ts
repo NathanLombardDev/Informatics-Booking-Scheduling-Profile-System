@@ -69,6 +69,7 @@ import { MaterialContentComponent } from './ClientMaterial/material-content/mate
 import { ViewAvailPackagesComponent } from './ClientPackages/view-avail-packages/view-avail-packages.component';
 import { ProvideFeedbackComponent } from './Feedback/provide-feedback/provide-feedback.component';
 import { ViewFeedbackComponent } from './Feedback/view-feedback/view-feedback.component';
+import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
 
 const routes: Routes = [
   {path:'login',component:LoginComponent},
@@ -241,7 +242,8 @@ const routes: Routes = [
    {path:'MaterialContent/edit/:id',component:MaterialContentComponent},
    {path:'ViewAvailPackages',component:ViewAvailPackagesComponent},
    {path:'ProvideFeedback',component:ProvideFeedbackComponent},
-   {path:'ViewFeedback',component:ViewFeedbackComponent}
+   {path:'ViewFeedback',component:ViewFeedbackComponent},
+   {path:'ViewCart',component:ViewCartComponent}
 ];
 
 @NgModule({

@@ -8,6 +8,8 @@ using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using PedalProAPI.Context;
 
 namespace PedalProAPI.Controllers
 {
@@ -23,8 +25,9 @@ namespace PedalProAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<AuthenticationController> _logger;
+        private readonly PedalProDbContext _context;
 
-        public EmployeeController(IRepository repository, UserManager<PedalProUser> userManager, ILogger<AuthenticationController> logger, IUserClaimsPrincipalFactory<PedalProUser> claimsPrincipalFactory, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IRepository repsository)
+        public EmployeeController(IRepository repository, UserManager<PedalProUser> userManager, ILogger<AuthenticationController> logger, IUserClaimsPrincipalFactory<PedalProUser> claimsPrincipalFactory, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IRepository repsository, PedalProDbContext context)
         {
             _repsository = repository;
             _userManager = userManager;
@@ -33,6 +36,7 @@ namespace PedalProAPI.Controllers
             _repository = repsository;
             _roleManager = roleManager;
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet]
@@ -40,6 +44,18 @@ namespace PedalProAPI.Controllers
         public async Task<IActionResult> GetAllEmployee()
         {
             var employees = await _repsository.GetAllEmployeeAsync();
+            return Ok(employees);
+        }
+
+        [HttpGet]
+        [Route("GetAllEmployeeTwo")]
+        public async Task<IActionResult> GetAllEmployeeTwo()
+        {
+            var employees = await _context.Employees
+               .Where(t => t.EmpStatusId == 1)
+               .ToListAsync();
+
+            //var employees = await _repsository.GetAllEmployeeAsync();
             return Ok(employees);
         }
 

@@ -78,7 +78,7 @@ namespace PedalProAPI.Controllers
             var timeslotIds = dateSlots.Select(ds => ds.TimeslotId).ToList();
 
             var timeslots = await _context.Timeslots
-                .Where(t => timeslotIds.Contains(t.TimeslotId))
+                .Where(t => timeslotIds.Contains(t.TimeslotId) && t.TimeslotStatusId == 1)
                 .ToListAsync();
 
             return Ok(timeslots);
@@ -110,7 +110,8 @@ namespace PedalProAPI.Controllers
             var timeslot = new Timeslot
             {
                 StartTime = dateWithTimeslotDto.StartTime,
-                EndTime = dateWithTimeslotDto.EndTime
+                EndTime = dateWithTimeslotDto.EndTime,
+                TimeslotStatusId=1
             };
             _repsository.Add(timeslot);
             await _repsository.SaveChangesAsync();
@@ -269,7 +270,7 @@ namespace PedalProAPI.Controllers
             try
             {
                 var result = await _repsository.GetTimeslotAsync(timeslotId);
-                if (result == null) return NotFound("Help does not exist");
+                if (result == null) return NotFound("Timeslot does not exist");
                 return Ok(result);
             }
             catch (Exception)

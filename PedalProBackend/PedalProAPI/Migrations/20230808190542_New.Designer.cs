@@ -12,8 +12,8 @@ using PedalProAPI.Context;
 namespace PedalProAPI.Migrations
 {
     [DbContext(typeof(PedalProDbContext))]
-    [Migration("20230730180439_new")]
-    partial class @new
+    [Migration("20230808190542_New")]
+    partial class New
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -472,17 +472,11 @@ namespace PedalProAPI.Migrations
                         .HasColumnType("int")
                         .HasColumnName("Package_ID");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int")
-                        .HasColumnName("Payment_ID");
-
                     b.HasKey("CartId");
 
                     b.HasIndex("CartStatusId");
 
                     b.HasIndex("PackageId");
-
-                    b.HasIndex("PaymentId");
 
                     b.ToTable("Cart");
                 });
@@ -504,6 +498,18 @@ namespace PedalProAPI.Migrations
                     b.HasKey("CartStatusId");
 
                     b.ToTable("CartStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            CartStatusId = 1,
+                            CartStatusName = "Empty"
+                        },
+                        new
+                        {
+                            CartStatusId = 2,
+                            CartStatusName = "Full"
+                        });
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.Checkout", b =>
@@ -922,6 +928,23 @@ namespace PedalProAPI.Migrations
                     b.HasKey("FeedbackCategoryId");
 
                     b.ToTable("FeedbackCategory");
+
+                    b.HasData(
+                        new
+                        {
+                            FeedbackCategoryId = 1,
+                            FeedbackCategoryName = "Usability"
+                        },
+                        new
+                        {
+                            FeedbackCategoryId = 2,
+                            FeedbackCategoryName = "Support"
+                        },
+                        new
+                        {
+                            FeedbackCategoryId = 3,
+                            FeedbackCategoryName = "Service"
+                        });
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.Help", b =>
@@ -1070,6 +1093,9 @@ namespace PedalProAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PackageId"), 1L, 1);
 
+                    b.Property<int?>("CartId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PackageDescription")
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -1081,6 +1107,8 @@ namespace PedalProAPI.Migrations
                         .HasColumnType("varchar(10)");
 
                     b.HasKey("PackageId");
+
+                    b.HasIndex("CartId");
 
                     b.ToTable("Package");
 
@@ -1462,9 +1490,49 @@ namespace PedalProAPI.Migrations
                     b.Property<string>("StartTime")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("TimeslotStatusId")
+                        .HasColumnType("int")
+                        .HasColumnName("TimeslotStatus_ID");
+
+                    b.Property<int?>("TrainingModuleStatusId")
+                        .HasColumnType("int");
+
                     b.HasKey("TimeslotId");
 
+                    b.HasIndex("TrainingModuleStatusId");
+
                     b.ToTable("Timeslot");
+                });
+
+            modelBuilder.Entity("PedalProAPI.Models.TimeslotStatus", b =>
+                {
+                    b.Property<int>("TimeslotStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("TimeslotStatus_ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TimeslotStatusId"), 1L, 1);
+
+                    b.Property<string>("TimeslotStatusName")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("TimeslotStatusId");
+
+                    b.ToTable("TimeslotStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            TimeslotStatusId = 1,
+                            TimeslotStatusName = "Available"
+                        },
+                        new
+                        {
+                            TimeslotStatusId = 2,
+                            TimeslotStatusName = "Booked"
+                        });
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.TrainingMaterial", b =>
@@ -1866,15 +1934,9 @@ namespace PedalProAPI.Migrations
                         .WithMany()
                         .HasForeignKey("PackageId");
 
-                    b.HasOne("PedalProAPI.Models.Payment", "Payment")
-                        .WithMany()
-                        .HasForeignKey("PaymentId");
-
                     b.Navigation("CartStatus");
 
                     b.Navigation("Package");
-
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.Checkout", b =>
@@ -2007,6 +2069,13 @@ namespace PedalProAPI.Migrations
                     b.Navigation("HelpCategory");
                 });
 
+            modelBuilder.Entity("PedalProAPI.Models.Package", b =>
+                {
+                    b.HasOne("PedalProAPI.Models.Cart", null)
+                        .WithMany("Packages")
+                        .HasForeignKey("CartId");
+                });
+
             modelBuilder.Entity("PedalProAPI.Models.PackagePrice", b =>
                 {
                     b.HasOne("PedalProAPI.Models.Package", "Package")
@@ -2124,6 +2193,15 @@ namespace PedalProAPI.Migrations
                     b.Navigation("Setup");
                 });
 
+            modelBuilder.Entity("PedalProAPI.Models.Timeslot", b =>
+                {
+                    b.HasOne("PedalProAPI.Models.TimeslotStatus", "TimeslotStatus")
+                        .WithMany()
+                        .HasForeignKey("TrainingModuleStatusId");
+
+                    b.Navigation("TimeslotStatus");
+                });
+
             modelBuilder.Entity("PedalProAPI.Models.TrainingMaterial", b =>
                 {
                     b.HasOne("PedalProAPI.Models.TrainingModule", "TrainingModule")
@@ -2185,6 +2263,11 @@ namespace PedalProAPI.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("WorkoutType");
+                });
+
+            modelBuilder.Entity("PedalProAPI.Models.Cart", b =>
+                {
+                    b.Navigation("Packages");
                 });
 #pragma warning restore 612, 618
         }

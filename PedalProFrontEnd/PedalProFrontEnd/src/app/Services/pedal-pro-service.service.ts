@@ -38,6 +38,8 @@ import { Testingdate } from '../Models/testingdate';
 import { Timeslotadd } from '../Models/timeslotadd';
 import { DateWithTimeslotDto } from '../Models/date-with-timeslot-dto';
 import { MaterialVid } from '../Models/material-vid';
+import { AddCart } from '../Models/add-cart';
+import { Cart } from '../Models/cart';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +77,8 @@ export class PedalProServiceService {
       tap((response) => {
         // Save the JWT token in local storage
         localStorage.setItem('jwt', response.value.token);
+        localStorage.setItem('cartQuantity', '0');
+        localStorage.setItem('cartId', '0');
       })
     );
   }
@@ -90,6 +94,7 @@ export class PedalProServiceService {
     // Remove the JWT token from local storage
     localStorage.removeItem('jwt');
     this.router.navigate(['/login']); // Redirect to the register page
+    localStorage.setItem('cartId', '0');
   }
   //Authentication ends
 
@@ -241,6 +246,10 @@ export class PedalProServiceService {
   //Start of employees
   GetEmployees(): Observable<any>{
     return this.http.get(`${this.apiUrl}Employee/GetAllEmployees`)
+    .pipe(map(result => result))
+  }
+  GetEmployeesTwo(): Observable<any>{
+    return this.http.get(`${this.apiUrl}Employee/GetAllEmployeeTwo`)
     .pipe(map(result => result))
   }
 
@@ -677,4 +686,27 @@ export class PedalProServiceService {
     getMaterialVids(moduleId: number): Observable<MaterialVid[]> {
     return this.http.get<MaterialVid[]>(`${this.apiUrl}TrainingModule/GetAllTrainingContent/${moduleId}`);
   }
+
+
+  addPackageToCart(packageId: number): Observable<any> {
+    const cartId = parseInt(localStorage.getItem('cartId') || '0', 10);
+
+    if (cartId === 0 || cartId === null) {
+      // No cartId found in localStorage, let the backend create a new cart
+      return this.http.post(`${this.apiUrl}Cart/AddPackageToCart`, { packageId });
+    } else {
+      // Call the backend with the retrieved cartId
+      return this.http.post(`${this.apiUrl}Cart/AddPackageToCart`, { cartId, packageId });
+    }
+  }
+
+  GetCart(id:any):Observable<Cart>{
+    return this.http.get<Cart>(this.apiUrl+'Cart/GetCart/'+id)
+  }
+
+  initiatePayment(cartId: number): Observable<any> {
+    const url = `${this.apiUrl}Checkout/initiate-payment?cartId=${cartId}`;
+    return this.http.post<any>(url, {});
+  }
+
 }

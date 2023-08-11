@@ -96,9 +96,12 @@ import { MaterialContentComponent } from './ClientMaterial/material-content/mate
 import { ViewAvailPackagesComponent } from './ClientPackages/view-avail-packages/view-avail-packages.component';
 import { ViewFeedbackComponent } from './Feedback/view-feedback/view-feedback.component';
 import { ProvideFeedbackComponent } from './Feedback/provide-feedback/provide-feedback.component';
+import { DeleteDialogComponent } from './Dialogs/delete-dialog/delete-dialog.component';
 
 
-
+import { MatDialogModule } from '@angular/material/dialog';
+import { AddCartDialogComponent } from './Dialogs/add-cart-dialog/add-cart-dialog.component';
+import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
 
 
 
@@ -193,7 +196,10 @@ import { ProvideFeedbackComponent } from './Feedback/provide-feedback/provide-fe
     MaterialContentComponent,
     ViewAvailPackagesComponent,
     ViewFeedbackComponent,
-    ProvideFeedbackComponent
+    ProvideFeedbackComponent,
+    DeleteDialogComponent,
+    AddCartDialogComponent,
+    ViewCartComponent
   ],
   imports: [
     BrowserModule,
@@ -213,7 +219,8 @@ import { ProvideFeedbackComponent } from './Feedback/provide-feedback/provide-fe
     MatSnackBarModule,
     MatSidenavModule,
     MaterialModule,
-    NgxDocViewerModule
+    NgxDocViewerModule,
+    MatDialogModule
     
   ],
   providers: [DatePipe,PedalProServiceService,

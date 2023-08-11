@@ -9,7 +9,9 @@ import { HelpCatergory } from 'src/app/Models/help-catergory';
 import { Package } from 'src/app/Models/package';
 import { PackagePrice } from 'src/app/Models/package-price';
 import { Price } from 'src/app/Models/price';
-
+import { MyDialogData } from 'src/app/Dialogs/add-cart-dialog/add-cart-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { AddCartDialogComponent } from 'src/app/Dialogs/add-cart-dialog/add-cart-dialog.component';
 
 @Component({
   selector: 'app-view-avail-packages',
@@ -19,7 +21,7 @@ import { Price } from 'src/app/Models/price';
 export class ViewAvailPackagesComponent implements OnInit{
   panelOpenState = false;
   modules:TrainingModule[]=[];
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient,private dialog:MatDialog){
   }
 
   packagePrices:PackagePrice[]=[];
@@ -27,10 +29,14 @@ export class ViewAvailPackagesComponent implements OnInit{
   prices:Price[]=[];
   searchTerm:string='';
 
+  cartnumber:any;
+
 
   ngOnInit(): void {
     this.GetPackagePrices();
-    this.GetModules()
+    this.GetModules();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
   }
 
   GetPackagePrices(){
@@ -107,6 +113,8 @@ export class ViewAvailPackagesComponent implements OnInit{
     
   }
 
+  
+
   DeletePackage(id:any)
   {
     this.service.DeletePackage(id).subscribe({
@@ -120,6 +128,43 @@ export class ViewAvailPackagesComponent implements OnInit{
         
       }
     })
+  }
+
+  addtoCart(packageId: number) {
+    const dialogData: MyDialogData = {
+      title: 'Confirm cart item',
+      message: 'Are you sure you want add this package your cart?'
+    };
+
+    const dialogRef = this.dialog.open(AddCartDialogComponent, {
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        // Call the service to add the package to the cart
+        this.service.addPackageToCart(packageId).subscribe(
+          (response) => {
+            console.log('Package added to cart:', response);
+            
+            // Set the cartId in localStorage with the new value returned from the service
+            localStorage.setItem('cartId', response.cartId.toString());
+            localStorage.setItem('cartQuantity', response.cartQuantity.toString());
+
+            // Handle success, update UI or navigate to the cart page
+            //this.router.navigate(['/ViewAvailPackages']); // Adjust the route based on your configuration
+            this.ReloadPage();
+          },
+          (error) => {
+            console.error('Error adding package to cart:', error);
+            // Handle error, show an error message, etc.
+          }
+        );
+      } else {
+        // User cancelled or closed the dialog
+        // Handle accordingly if needed
+      }
+    });
   }
 
   ReloadPage()
@@ -151,6 +196,7 @@ export class ViewAvailPackagesComponent implements OnInit{
   Logout()
   {
     this.service.logout();
+    
   }
   
 }

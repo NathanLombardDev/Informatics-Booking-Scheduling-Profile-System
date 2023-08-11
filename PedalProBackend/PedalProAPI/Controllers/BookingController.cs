@@ -206,6 +206,19 @@ namespace PedalProAPI.Controllers
 
                 try
                 {
+                    var timeslot = await _dbContext.Timeslots.FindAsync(schedule.timeslotId);
+
+                    // If the timeslot does not exist, return NotFound
+                    if (timeslot == null)
+                    {
+                    return NotFound();
+                    }
+
+                    timeslot.TimeslotStatusId = 2;
+
+                    _dbContext.Entry(timeslot).State = EntityState.Modified;
+                    await _repsository.SaveChangesAsync();
+
                     _repsository.Add(booking);
                     await _repsository.SaveChangesAsync();
                     return Ok(booking);

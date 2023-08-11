@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { BicycleBrand } from '../../Models/bicycle-brand';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
 
 @Component({
   selector: 'app-bicycle-brand',
@@ -11,7 +13,7 @@ import { BicycleBrand } from '../../Models/bicycle-brand';
   styleUrls: ['./bicycle-brand.component.css']
 })
 export class BicycleBrandComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient,private dialog:MatDialog){}
 
   brands:BicycleBrand[]=[];
   searchTerm:string='';
@@ -45,19 +47,29 @@ export class BicycleBrandComponent implements OnInit{
   }
 
   //Delete Brands from the list
-  DeleteBrand(id:any)
-  {
-    this.service.DeleteBicycleBrand(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.brands.findIndex((brand)=>brand.bicycleBrandId===id);
-        if(index!=-1){
-          this.brands.slice(index,1);
-        }
-        this.openModal();
-        
+  DeleteBrand(id: any) {
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this brand?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.service.DeleteBicycleBrand(id).subscribe({
+          next: (response) => {
+            const index = this.brands.findIndex((brand) => brand.bicycleBrandId === id);
+            if (index !== -1) {
+              this.brands.splice(index, 1); // Use splice instead of slice to remove the element from the array
+            }
+            this.openModal();
+          }
+        });
       }
-    })
+    });
   }
 
 

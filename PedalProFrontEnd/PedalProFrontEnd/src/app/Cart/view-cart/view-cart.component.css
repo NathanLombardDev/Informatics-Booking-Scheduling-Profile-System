@@ -1,0 +1,87 @@
+.cart-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.cart-content {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cart-summary-item {
+  flex: 1;
+  text-align: center;
+}
+
+.cart-items {
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.remove-btn {
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkout-btn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+}
+
+
+mat-icon:hover {
+  cursor: pointer;
+}
+
+.circular-button {
+  border-radius: 50%;
+  overflow: hidden;
+  width: 40px; /* Adjust the width and height to your desired size */
+  height: 40px;
+}
+
+.circular-button:hover{
+  cursor: pointer;
+}
+
+.circular-button img {
+  width: 100%; /* Make the image fill the circular boundary */
+  height: 100%; /* Make the image fill the circular boundary */
+  object-fit: cover; /* Preserve the image aspect ratio */
+}
+
+a.nav-link.active:hover,
+a.nav-link[aria-current='page']:hover {
+cursor: pointer;
+}

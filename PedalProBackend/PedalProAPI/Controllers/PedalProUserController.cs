@@ -236,8 +236,7 @@ namespace PedalProAPI.Controllers
 
 
 
-            string accountSid = "ACd5e788f9060d80154c2866b6468bb9d1";
-            string authToken = "bb3026c55bca34a6754628315a4633f9";
+            
 
 
             if (clientbookingRem != null)
@@ -270,8 +269,7 @@ namespace PedalProAPI.Controllers
         [Route("api/send-sms")]
         public async Task<IActionResult> SendSms(int clientId)
         {
-            string apiKey = "f0934fee";
-            string apiSecret = "vYQvVR4hdHNPDIx8";
+            
 
             var clientbookingRem = await _repsository.GetBookingsReminder(clientId);
 

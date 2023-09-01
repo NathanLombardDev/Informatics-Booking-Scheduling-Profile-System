@@ -7,7 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="tessdata\**" />
+    <Content Remove="tessdata\**" />
+    <EmbeddedResource Remove="tessdata\**" />
+    <None Remove="tessdata\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Braintree" Version="5.18.0" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.22.0" />
+    <PackageReference Include="Google.Cloud.Vision.V1" Version="3.3.0" />
+    <PackageReference Include="IronOcr" Version="2023.8.34" />
     <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.16" />
@@ -23,11 +33,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.16" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects.SSMS" Version="161.47027.0" />
     <PackageReference Include="NBitcoin" Version="7.0.27" />
     <PackageReference Include="PayFast" Version="1.0.5" />
     <PackageReference Include="PayFast.AspNet" Version="1.0.5" />
     <PackageReference Include="PayFast.AspNetCore" Version="1.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
+    <PackageReference Include="Twilio" Version="6.11.0" />
+    <PackageReference Include="Vonage" Version="6.8.0" />
+    <PackageReference Include="WCM.iTextSharp" Version="4.1.6" />
   </ItemGroup>
 
   <ItemGroup>

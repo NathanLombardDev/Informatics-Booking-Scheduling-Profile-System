@@ -15,6 +15,10 @@ namespace PedalProAPI.Context
 
         public virtual DbSet<Bicycle> Bicycles { get; set; }
 
+        public virtual DbSet<PackageRevenue> PackageRevenues { get; set; }
+
+        public virtual DbSet<BookingRevenue> BookingRevenues { get; set; }
+
         public virtual DbSet<BicycleBrand> BicycleBrands { get; set; }
 
         public virtual DbSet<BicycleCategory> BicycleCategories { get; set; }
@@ -69,7 +73,7 @@ namespace PedalProAPI.Context
 
         public virtual DbSet<Payment> Payments { get; set; }
 
-        public virtual DbSet<PedalProRole> PedalProRoles { get; set; }
+        //public virtual DbSet<PedalProRole> PedalProRoles { get; set; }
 
         //public virtual DbSet<PedalProUser> PedalProUsers { get; set; }
 
@@ -85,11 +89,11 @@ namespace PedalProAPI.Context
 
         public virtual DbSet<Service> Services { get; set; }
 
-        public virtual DbSet<ServicePrice> ServicePrices { get; set; }
+        //public virtual DbSet<ServicePrice> ServicePrices { get; set; }
 
         public virtual DbSet<Setup> Setups { get; set; }
 
-        public virtual DbSet<SetupPrice> SetupPrices { get; set; }
+        //public virtual DbSet<SetupPrice> SetupPrices { get; set; }
 
         public virtual DbSet<Timeslot> Timeslots { get; set; }
 
@@ -141,7 +145,7 @@ namespace PedalProAPI.Context
             modelBuilder.Entity<TrainingModuleStatus>().HasData(new { TrainingModuleStatusId = 1, TrainingModuleStatusName = "Unstarted" });
 
             //TestPackage
-            modelBuilder.Entity<Package>().HasData(new { PackageId = 1, PackageName = "Platinum", PackageDescription = "The base package" });
+            //modelBuilder.Entity<Package>().HasData(new { PackageId = 1, PackageName = "Platinum", PackageDescription = "The base package" });
 
             //TestClient
             //modelBuilder.Entity<Client>().HasData(new { ClientId = 1, ClientTitle = "Mr", ClientName = "Nathan", ClientSurname = "Lombard", ClientEmailAddress = "lompies1234@gmail.com", ClientPhysicalAddress = "Hatfield", ClientPhoneNum = "0768582883", ClientDateOfBirth = DateTime.Now, ClientProfilePicture = "URL" });
@@ -153,9 +157,9 @@ namespace PedalProAPI.Context
 
 
             //Booking Type
-            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 1, BookingTypeName = "Training" });
-            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 2, BookingTypeName = "Repair" });
-            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 3, BookingTypeName = " Setup" });
+            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 1, BookingTypeName = "Training", BookingTypePrice=100.00 });
+            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 2, BookingTypeName = "Repair", BookingTypePrice = 500.00 });
+            modelBuilder.Entity<BookingType>().HasData(new { BookingTypeId = 3, BookingTypeName = " Setup", BookingTypePrice=250.00 });
 
 
             //ClientTypes

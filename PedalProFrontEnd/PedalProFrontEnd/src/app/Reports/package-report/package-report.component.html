@@ -1,0 +1,59 @@
+<br/>
+
+
+<div class="report-container">
+    <mat-icon routerLink="/companyLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    <h1>Package Revenue Report</h1>
+      
+    <button id="submit" (click)="generatePDF()">Generate PDF</button>
+    <br/>
+    <h4>Preview:</h4>
+    <div  style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background-color: white;">
+    <div id="report-content" class="report-content" style="margin-top: 20px;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <img src="assets/CBT.jpg" style="width: 50px; margin-right: 10px; float: left;" />
+            <em style="font-size: 18px; text-align: center; display: inline-block; margin: 0 auto;"><b>Callan's Bike Tech</b></em>
+            <img src="assets/pedal.png" style="width: 50px; margin-left: 10px; float: right;" />
+          </div>
+          <br/>
+          <br/>
+          <br/>
+          <h4 style="font-size: 24px; text-align: center;">Estimated Package Revenue</h4>
+          <!-- Grouping Control Breaks by Package Name -->
+          <ng-container *ngFor="let workout of reportDatatwo.reportDataList; let i = index; let last = last">
+              <div *ngIf="i === 0 || workout.packageName !== reportDatatwo.reportDataList[i - 1].packageName">
+                  <h5 style="font-size: 20px; margin-top: 10px;">Package: {{ workout.packageName }}</h5>
+              </div>
+
+              <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+                  <thead>
+                      <th>Price</th>
+                      <th>Quantity Bought</th>
+                      
+                  </thead>
+                  <tbody>
+                      <td>R{{workout.price}}</td>
+                      <td>{{workout.quantity}}</td>
+                  </tbody>
+              </table>
+
+              <!-- Display subtotal if it's the last item with the same package name or the list -->
+              <div >
+                  <div style="text-align: right; margin-top: 10px;">
+                      Total Estimated Revenue for Package: R{{ workout.totalRevenue }}
+                  </div>
+              </div>
+          </ng-container>
+
+          <!-- Total revenue -->
+          <p style="text-align: right; margin-top: 10px;">
+              Total Estimated Revenue: R{{ reportDatatwo.total }}
+          </p>
+        
+      </div>
+    </div>
+</div>
+
+
+

@@ -1,19 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BicyclePartController : ControllerBase
     {
         private readonly IRepository _repsository;
-        public BicyclePartController(IRepository repository)
+        private readonly UserManager<PedalProUser> _userManager;
+        public BicyclePartController(IRepository repository, UserManager<PedalProUser> userManager)
         {
             _repsository = repository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -43,8 +52,37 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddbicyclePart")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Addbicyclepart(BicyclePartViewModel bicyclePartAdd)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+
             var bicyclepartAdd = new BicyclePart { BicyclePartName = bicyclePartAdd.BicyclePartName };
 
             try
@@ -63,10 +101,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("Editbicyclepart/{bicyclePartId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<BicyclePartViewModel>> Updatebicyclepart(int bicyclePartId, BicyclePartViewModel bicyclePartModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingPart = await _repsository.GetBicyclePartAsync(bicyclePartId);
                 if (existingPart == null) return NotFound("The Bicycle Part does not exist");
 
@@ -86,10 +152,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteBicyclePart/{bicyclePartId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Deletebicyclepart(int bicyclePartId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingPart = await _repsository.GetBicyclePartAsync(bicyclePartId);
                 if (existingPart == null) return NotFound($"The Bicycle Part does not exist");
 

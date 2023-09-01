@@ -19,7 +19,7 @@ namespace PedalProAPI.Models
         public string? BrandImgName { get; set; }
 
         [Column("ImageURL")]
-        [StringLength(10)]
+        [StringLength(500)]
         [Unicode(false)]
         public string? ImageUrl { get; set; }
 

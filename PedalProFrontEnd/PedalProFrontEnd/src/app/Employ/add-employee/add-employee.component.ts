@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { PedalProRole } from 'src/app/Models/pedal-pro-role';
 import { EmployeeStatus } from '../../Models/employee-status';
 import { EmployeeType } from '../../Models/employee-type';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-employee',
@@ -12,7 +14,7 @@ import { EmployeeType } from '../../Models/employee-type';
   styleUrls: ['./add-employee.component.css']
 })
 export class AddEmployeeComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService,private router:Router){}
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService,private router:Router){}
 
   //Employee Array
   addEmployees:Employee={
@@ -72,6 +74,12 @@ export class AddEmployeeComponent implements OnInit{
     return this.empTypesTwo;
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
 //Add An Employee to the system
   addEmployee(){
     if(this.addEmployees.empName && this.addEmployees.emailAddress && this.addEmployees.empPhoneNum && this.addEmployees.empSurname && this.addEmployees.empStatusId && this.addEmployees.empTitle && this.addEmployees.password && this.addEmployees.empTypeId)
@@ -79,10 +87,14 @@ export class AddEmployeeComponent implements OnInit{
       this.dataservice.AddEmployee(this.addEmployees).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
   cancel_continue(){

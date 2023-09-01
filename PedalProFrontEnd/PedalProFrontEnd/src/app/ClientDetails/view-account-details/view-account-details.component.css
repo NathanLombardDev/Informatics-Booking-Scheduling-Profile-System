@@ -1,19 +1,28 @@
-/* account-details.component.css */
-
-/* ... (previously defined styles) */
-
-
 .container {
     text-align: center; /* Center the content horizontally */
     max-width: 400px;
     margin: 20px auto; /* Center the container itself */
     background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 20px 0 rgb(41, 167, 2);
     padding: 20px; /* Add padding for better spacing */
     position: relative; /* Set the container as relative for absolute positioning */
   }
+  #submit{
+    background-color: black;
+    color: #199709;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.6s ease-in-out;
+    border-radius: 30px;
+  }
   
+  #submit:hover{
+    background-color: white;
+    color: #199709;
+    border:black solid 1px;
+  }
   h2 {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
@@ -28,9 +37,11 @@
     /* If you want a border around the image */
     border: 3px solid black;
     margin: 0 auto 10px; /* Center the image within the container and add margin at the bottom */
+    cursor: pointer;
+    transition: background-color 0.9s ease-in-out;
   }
 
-  .profile-image:hover {border: 3px solid #39eb0d;}
+  .profile-image:hover {border: 3px solid black;}
   
   .profile-image img {
     width: 100%;
@@ -49,10 +60,13 @@
     align-items: center;
     justify-content: center;
     margin-left: auto; /* Push the button to the right */
+    transition: background-color 0.6s ease-in-out;
   }
   
   .edit-icon:hover {
-    background-color: #39eb0d;
+    color: #199709;
+    background-color: white;
+    border:black solid 1px;
   }
   
   .edit-icon mat-icon {
@@ -67,3 +81,38 @@
     cursor: pointer;
     
   }
+
+  .profile-image .icontwo {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-40%, -50%);
+    z-index: 1;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 20px;
+    background-color: black;
+    color: #39eb0d;
+    border-radius: 20px;
+}
+
+.profile-image:hover .icontwo {
+    opacity: 1;
+}
+
+#modalBody{
+  text-align: center;
+  border:black 4px solid;
+  border-radius: 12px;
+  background-color: white;
+}
+#continue{
+  border:black 2px solid;
+}
+#alert{
+  color: red;
+}
+
+mat-icon:hover {
+  cursor: pointer;
+}

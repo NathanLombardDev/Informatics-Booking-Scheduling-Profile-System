@@ -9,6 +9,8 @@ import { BicycleCategory } from '../../Models/bicycle-category';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { WorkoutType } from 'src/app/Models/workout-type';
 import { Workout } from 'src/app/Models/workout';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-workout',
@@ -16,13 +18,17 @@ import { Workout } from 'src/app/Models/workout';
   styleUrls: ['./add-workout.component.css']
 })
 export class AddWorkoutComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){}
   
   ngOnInit(): void {
     this.GetModules();
     this.GetWorkoutTypes();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
-  
+  clientDetails: any;
+  cartnumber:any;
   addBicycles:Bicycle={
     bicycleId:0,
     bicycleName:'',
@@ -44,7 +50,17 @@ export class AddWorkoutComponent implements OnInit{
   //brands:BicycleBrand[]=[];
   workoutTypes:WorkoutType[]=[];
   
-
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
   
   // get modules method
   GetModules(){
@@ -55,6 +71,12 @@ export class AddWorkoutComponent implements OnInit{
       });
     })
     return this.modules;
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
 
@@ -75,10 +97,14 @@ export class AddWorkoutComponent implements OnInit{
       this.service.AddBicycle(this.addBicycles).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
 
@@ -88,10 +114,14 @@ export class AddWorkoutComponent implements OnInit{
       this.service.AddWorkout(this.addworkouts).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
   cancel_continue(){

@@ -344,6 +344,26 @@ namespace PedalProAPI.Migrations
                     b.ToTable("Booking");
                 });
 
+            modelBuilder.Entity("PedalProAPI.Models.BookingRevenue", b =>
+                {
+                    b.Property<int>("BookingRevenueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookingRevenueId"), 1L, 1);
+
+                    b.Property<string>("BookingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookingRevenueId");
+
+                    b.ToTable("BookingRevenues");
+                });
+
             modelBuilder.Entity("PedalProAPI.Models.BookingStatus", b =>
                 {
                     b.Property<int>("BookingStatusId")
@@ -394,6 +414,10 @@ namespace PedalProAPI.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(10)");
 
+                    b.Property<double?>("BookingTypePrice")
+                        .HasColumnType("float")
+                        .HasColumnName("BookingTypePrice");
+
                     b.HasKey("BookingTypeId");
 
                     b.ToTable("BookingType");
@@ -402,17 +426,20 @@ namespace PedalProAPI.Migrations
                         new
                         {
                             BookingTypeId = 1,
-                            BookingTypeName = "Training"
+                            BookingTypeName = "Training",
+                            BookingTypePrice = 100.0
                         },
                         new
                         {
                             BookingTypeId = 2,
-                            BookingTypeName = "Repair"
+                            BookingTypeName = "Repair",
+                            BookingTypePrice = 500.0
                         },
                         new
                         {
                             BookingTypeId = 3,
-                            BookingTypeName = " Setup"
+                            BookingTypeName = " Setup",
+                            BookingTypePrice = 250.0
                         });
                 });
 
@@ -435,9 +462,9 @@ namespace PedalProAPI.Migrations
                         .HasColumnName("ImageType_ID");
 
                     b.Property<string>("ImageUrl")
-                        .HasMaxLength(10)
+                        .HasMaxLength(500)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(10)")
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("ImageURL");
 
                     b.HasKey("BrandImageId");
@@ -610,6 +637,16 @@ namespace PedalProAPI.Migrations
                     b.Property<int?>("ClientTypeId")
                         .HasColumnType("int")
                         .HasColumnName("ClientType_ID");
+
+                    b.Property<bool>("IsActive")
+                        .HasMaxLength(10)
+                        .IsUnicode(false)
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("NumBookingsAllowance")
+                        .HasMaxLength(10)
+                        .IsUnicode(false)
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -1094,6 +1131,11 @@ namespace PedalProAPI.Migrations
                     b.Property<int?>("CartId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("NumPackageBookings")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("int");
+
                     b.Property<string>("PackageDescription")
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -1109,14 +1151,6 @@ namespace PedalProAPI.Migrations
                     b.HasIndex("CartId");
 
                     b.ToTable("Package");
-
-                    b.HasData(
-                        new
-                        {
-                            PackageId = 1,
-                            PackageDescription = "The base package",
-                            PackageName = "Platinum"
-                        });
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.PackagePrice", b =>
@@ -1145,6 +1179,26 @@ namespace PedalProAPI.Migrations
                     b.ToTable("PackagePrice");
                 });
 
+            modelBuilder.Entity("PedalProAPI.Models.PackageRevenue", b =>
+                {
+                    b.Property<int>("PackageRevenueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PackageRevenueId"), 1L, 1);
+
+                    b.Property<string>("PackageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("PackageRevenueId");
+
+                    b.ToTable("PackageRevenues");
+                });
+
             modelBuilder.Entity("PedalProAPI.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -1163,25 +1217,6 @@ namespace PedalProAPI.Migrations
                     b.HasKey("PaymentId");
 
                     b.ToTable("Payment");
-                });
-
-            modelBuilder.Entity("PedalProAPI.Models.PedalProRole", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Role_ID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"), 1L, 1);
-
-                    b.Property<string>("RoleName")
-                        .HasMaxLength(10)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(10)");
-
-                    b.HasKey("RoleId");
-
-                    b.ToTable("PedalProRole");
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.PedalProUser", b =>
@@ -1396,32 +1431,6 @@ namespace PedalProAPI.Migrations
                     b.ToTable("Service");
                 });
 
-            modelBuilder.Entity("PedalProAPI.Models.ServicePrice", b =>
-                {
-                    b.Property<int>("ServicePriceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ServicePrice_ID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServicePriceId"), 1L, 1);
-
-                    b.Property<int?>("PriceId")
-                        .HasColumnType("int")
-                        .HasColumnName("Price_ID");
-
-                    b.Property<int?>("SetupId")
-                        .HasColumnType("int")
-                        .HasColumnName("Setup_ID");
-
-                    b.HasKey("ServicePriceId");
-
-                    b.HasIndex("PriceId");
-
-                    b.HasIndex("SetupId");
-
-                    b.ToTable("ServicePrice");
-                });
-
             modelBuilder.Entity("PedalProAPI.Models.Setup", b =>
                 {
                     b.Property<int>("SetupId")
@@ -1445,32 +1454,6 @@ namespace PedalProAPI.Migrations
                     b.HasIndex("BicycleId");
 
                     b.ToTable("Setup");
-                });
-
-            modelBuilder.Entity("PedalProAPI.Models.SetupPrice", b =>
-                {
-                    b.Property<int>("SetupPriceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("SetupPrice_ID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SetupPriceId"), 1L, 1);
-
-                    b.Property<int?>("PriceId")
-                        .HasColumnType("int")
-                        .HasColumnName("Price_ID");
-
-                    b.Property<int?>("SetupId")
-                        .HasColumnType("int")
-                        .HasColumnName("Setup_ID");
-
-                    b.HasKey("SetupPriceId");
-
-                    b.HasIndex("PriceId");
-
-                    b.HasIndex("SetupId");
-
-                    b.ToTable("SetupPrice");
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.Timeslot", b =>
@@ -1761,6 +1744,9 @@ namespace PedalProAPI.Migrations
 
                     b.Property<int?>("HeartRate")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("WorkoutDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("WorkoutTypeId")
                         .HasColumnType("int")
@@ -2152,21 +2138,6 @@ namespace PedalProAPI.Migrations
                     b.Navigation("BicyclePart");
                 });
 
-            modelBuilder.Entity("PedalProAPI.Models.ServicePrice", b =>
-                {
-                    b.HasOne("PedalProAPI.Models.Price", "Price")
-                        .WithMany()
-                        .HasForeignKey("PriceId");
-
-                    b.HasOne("PedalProAPI.Models.Setup", "Setup")
-                        .WithMany()
-                        .HasForeignKey("SetupId");
-
-                    b.Navigation("Price");
-
-                    b.Navigation("Setup");
-                });
-
             modelBuilder.Entity("PedalProAPI.Models.Setup", b =>
                 {
                     b.HasOne("PedalProAPI.Models.Bicycle", "Bicycle")
@@ -2174,21 +2145,6 @@ namespace PedalProAPI.Migrations
                         .HasForeignKey("BicycleId");
 
                     b.Navigation("Bicycle");
-                });
-
-            modelBuilder.Entity("PedalProAPI.Models.SetupPrice", b =>
-                {
-                    b.HasOne("PedalProAPI.Models.Price", "Price")
-                        .WithMany()
-                        .HasForeignKey("PriceId");
-
-                    b.HasOne("PedalProAPI.Models.Setup", "Setup")
-                        .WithMany()
-                        .HasForeignKey("SetupId");
-
-                    b.Navigation("Price");
-
-                    b.Navigation("Setup");
                 });
 
             modelBuilder.Entity("PedalProAPI.Models.Timeslot", b =>

@@ -49,6 +49,18 @@
               "target": "Package",
               "version": "[5.18.0, )"
             },
+            "CloudinaryDotNet": {
+              "target": "Package",
+              "version": "[1.22.0, )"
+            },
+            "Google.Cloud.Vision.V1": {
+              "target": "Package",
+              "version": "[3.3.0, )"
+            },
+            "IronOcr": {
+              "target": "Package",
+              "version": "[2023.8.34, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[4.0.0, )"
@@ -89,6 +101,10 @@
               "target": "Package",
               "version": "[6.0.16, )"
             },
+            "Microsoft.SqlServer.SqlManagementObjects.SSMS": {
+              "target": "Package",
+              "version": "[161.47027.0, )"
+            },
             "NBitcoin": {
               "target": "Package",
               "version": "[7.0.27, )"
@@ -108,6 +124,22 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"
+            },
+            "Tesseract": {
+              "target": "Package",
+              "version": "[5.2.0, )"
+            },
+            "Twilio": {
+              "target": "Package",
+              "version": "[6.11.0, )"
+            },
+            "Vonage": {
+              "target": "Package",
+              "version": "[6.8.0, )"
+            },
+            "WCM.iTextSharp": {
+              "target": "Package",
+              "version": "[4.1.6, )"
             }
           },
           "imports": [

@@ -7,6 +7,8 @@ import { TrainingMaterial } from '../../Models/training-material';
 import { TrainingModule } from '../../Models/training-module';
 import { ModuleTwo } from '../../Models/module-two';
 import { ModuleStatus } from '../../Models/module-status';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-material',
@@ -14,7 +16,7 @@ import { ModuleStatus } from '../../Models/module-status';
   styleUrls: ['./add-material.component.css']
 })
 export class AddMaterialComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService,private router:Router){}
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService,private router:Router){}
   addMaterials:TrainingMaterial={
     trainingModuleId:0,
     trainingMaterialId:0,
@@ -33,6 +35,12 @@ export class AddMaterialComponent implements OnInit{
     this.GetVideoTypes();
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   // Add function
   addMaterial(){
     if(this.addMaterials.trainingMaterialName && this.addMaterials.content && this.addMaterials.trainingModuleId && this.addMaterials.videoUrl && this.addMaterials.videoTypeId)
@@ -40,11 +48,15 @@ export class AddMaterialComponent implements OnInit{
       this.dataservice.AddMaterial(this.addMaterials).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }
     else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
     

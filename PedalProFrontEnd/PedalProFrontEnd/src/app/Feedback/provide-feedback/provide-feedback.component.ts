@@ -9,21 +9,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { NgModule } from '@angular/core';
 
+import { Feedback } from 'src/app/Models/feedback';
+import { FeedbackCatergory } from 'src/app/Models/feedback-catergory';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 
-interface FeedbackCategory {
-  feedbackCategoryId: number;
-  feedbackCategoryName: string;
-}
 
-interface Feedback {
-  feedbackID: number;
-  feedbackDescription: string;
-  feedbackRating: number;
-  feedbackCategoryID: number;
-  //clientID: number;
-  //trainingSessionID: number;
-}
 
 @Component({
   selector: 'app-provide-feedback',
@@ -31,18 +23,51 @@ interface Feedback {
   styleUrls: ['./provide-feedback.component.css']
 })
 export class ProvideFeedbackComponent implements OnInit{
-  feedbackTypes: FeedbackCategory[] = [];
+  feedbackTypes: FeedbackCatergory[] = [];
   selectedFeedbackTypeID: number | null = null;
   rating: number | null = null;
   feedbackDescription: string = '';
+  clientDetails: any;
+  cartnumber:any;
   
   
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){}
   modules:TrainingModule[]=[];
+
+  provideFeedbacks:Feedback={
+    feedbackId:0,
+    feedbackCategoryId:0,
+    feedbackRating:0,
+    feedbackDescription:''
+  }
+
+   // Help Category
+   matFeedbackCategories:FeedbackCatergory[]=[];
+
+
+   Logout()
+   {
+     this.service.logout();
+   }
+
+   fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
   
   ngOnInit(): void {
     this.GetModules();
-    this.getFeedbackTypes();
+    this.GetAllFeedbackCategories();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
   GetModules(){
     this.service.GetModules().subscribe(result=>{
@@ -54,67 +79,55 @@ export class ProvideFeedbackComponent implements OnInit{
     return this.modules;
   }
 
-  Logout()
-  {
-    this.service.logout();
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
-  getFeedbackTypes() {
-
-    this.http
-
-      .get<FeedbackCategory[]>('https:url/api/feedbacktypes')
-
-      .subscribe((data) => {
-
-        this.feedbackTypes = data;
-
+  provideFeedback(){
+    if(this.provideFeedbacks.feedbackCategoryId && this.provideFeedbacks.feedbackRating && this.provideFeedbacks.feedbackDescription)
+    {
+      this.service.ProvideFeedback(this.provideFeedbacks).subscribe({
+        next:(course)=>{
+          this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
+        }
       });
-
+    }
+    else{
+      this.openErrorDialog('Validation error: Please fill in all fields.');
+    }
+    
+    
+  }
+  //redirect
+  cancel_continue(){
+    this.router.navigate(['clientLanding']);
   }
 
-  submitFeedback() {
-
-    if (this.selectedFeedbackTypeID && this.rating && this.feedbackDescription) {
-
-      const newFeedback: Feedback = {
-
-        feedbackID: 0, // The API will generate the ID
-
-        feedbackDescription: this.feedbackDescription,
-
-        feedbackRating: this.rating,
-
-        feedbackCategoryID: this.selectedFeedbackTypeID,
-
-        
-
-      };
-
-
-
-      this.http
-
-        .post<Feedback>('https://url/api/feedback', newFeedback)
-
-        .subscribe((response) => {
-
-          // Handle success
-
-          console.log('Feedback submitted successfully:', response);
-
-          // Reset form fields
-
-          this.selectedFeedbackTypeID = null;
-
-          this.rating = null;
-
-          this.feedbackDescription = '';
-
-        });
-
+  //modal-pop-up
+  openModal()
+  {
+    const modelDiv=document.getElementById('myModal');
+    if(modelDiv!=null)
+    {
+      modelDiv.style.display='block';
     }
-
+  }
+  
+  //getHelp Categories
+  GetAllFeedbackCategories(){
+    this.service.GetAllFeedbackCategories().subscribe(result=>{
+      let FeedbackCatergoryList:any[]=result
+      FeedbackCatergoryList.forEach((element)=>{
+        this. matFeedbackCategories.push(element)
+      });
+    })
+    return this.matFeedbackCategories;
   }
 
 }

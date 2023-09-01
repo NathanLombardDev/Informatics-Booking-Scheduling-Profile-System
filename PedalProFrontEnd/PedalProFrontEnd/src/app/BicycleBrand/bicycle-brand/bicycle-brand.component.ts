@@ -6,6 +6,8 @@ import { map, Observable, Subject } from 'rxjs';
 import { BicycleBrand } from '../../Models/bicycle-brand';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { BrandImage } from 'src/app/Models/brand-image';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-bicycle-brand',
@@ -17,22 +19,47 @@ export class BicycleBrandComponent implements OnInit{
 
   brands:BicycleBrand[]=[];
   searchTerm:string='';
+  brandimages:BrandImage[]=[];
 
   ngOnInit(): void {
     this.GetBrands();
   }
 
   //Get brands from the array
-  GetBrands()
-  {
-    this.service.GetBicycleBrands().subscribe(result=>{
-      let brandList:any[]=result
-      brandList.forEach((element)=>{
-        this.brands.push(element)
+  GetBrands() {
+    this.service.GetBicycleBrands().subscribe(result => {
+      let brandList: any[] = result;
+      brandList.forEach((element) => {
+        this.service.GetBicycleBrandImage(element.brandImageId).subscribe(imageResult => {
+          element.imageUrl = imageResult.imageUrl; // Add imageUrl to each brand
+          this.brands.push(element);
+        });
       });
-    })
-    
+    });
     return this.brands;
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
+  GetBrandImage(id: any) {
+    const empType = this.brandimages.find(m => m.brandImageId === id);
+  
+    if (empType) {
+      return empType.imageUrl;
+    } else {
+      this.service.GetBicycleBrandImage(id).subscribe(result => {
+        this.brandimages.push(result);
+        return result.imageUrl;
+      });
+    }
+  
+    // add a return statement here to handle the case where the module is not found
+    return 'Module does not exist';
+
     
   }
 
@@ -66,6 +93,10 @@ export class BicycleBrandComponent implements OnInit{
               this.brands.splice(index, 1); // Use splice instead of slice to remove the element from the array
             }
             this.openModal();
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
           }
         });
       }

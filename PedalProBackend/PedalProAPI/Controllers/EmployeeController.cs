@@ -10,11 +10,17 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PedalProAPI.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EmployeeController : ControllerBase
     {
         private readonly IRepository _repsository;
@@ -77,10 +83,39 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddEmployee")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddEmployee(EmployeeViewModel employeeAdd)
         {
             try
             {
+
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
 
                 var userTwo = await _userManager.FindByEmailAsync(employeeAdd.EmailAddress);
 
@@ -162,20 +197,41 @@ namespace PedalProAPI.Controllers
             
         }
 
-
-
-
-
         [HttpPut]
         [Route("EditEmployee/{employeeId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<EmployeeViewModel>> UpdateEmployee(int employeeId, EmployeeViewModelTwo employeeModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var userTwo = await _userManager.FindByEmailAsync(employeeModel.EmailAddress);
-
-                
-
 
                 var existingEmployee = await _repsository.GetEmployeeAsync(employeeId);
                 if (existingEmployee == null) return NotFound("The Employee does not exist");
@@ -192,18 +248,9 @@ namespace PedalProAPI.Controllers
                 var existUser=await _repository.GetUserFromEmp(existingEmployee.UserId);
                 if (existUser == null) return NotFound("The User does not exist");
 
-                /*
-                var existingUser = await _userManager.FindByEmailAsync(employeeModel.EmailAddress);
-                if (existingUser == null) return NotFound("The User does not exist");
-                */
-
-
                 existUser.UserName = employeeModel.EmailAddress;
-                //existingUser.PasswordHash = employeeModel.Password;
                 existUser.Email = employeeModel.EmailAddress;
-                //existingUser.RoleId = employeeModel.RoleId;
-
-
+                
                 var email = new MimeMessage();
                 email.From.Add(MailboxAddress.Parse("nathantheawsome1234@gmail.com"));
                 email.To.Add(MailboxAddress.Parse(existingEmployee.EmpEmailAddress));
@@ -235,10 +282,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteEmployee/{employeeId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int employeeId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingEmployee = await _repsository.GetEmployeeAsync(employeeId);
                 if (existingEmployee == null) return NotFound($"The employee does not exist");
 

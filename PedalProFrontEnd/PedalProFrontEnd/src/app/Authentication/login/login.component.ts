@@ -1,18 +1,26 @@
-import { Component } from '@angular/core';
+import { Component,OnInit } from '@angular/core';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { Router } from '@angular/router';
-
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
   email: string = '';
   password: string = '';
 
-  constructor(private service: PedalProServiceService, private router:Router) {}
+  constructor(private service: PedalProServiceService, private router:Router,private dialog:MatDialog) {}
+
+  ngOnInit(): void {
+    history.pushState({}, '', window.location.href);
+    window.onpopstate = function(event) {
+      history.go(1);
+    };
+  }
 
   onLogin(): void {
     this.service.login(this.email, this.password).subscribe(
@@ -40,7 +48,9 @@ export class LoginComponent {
       },
       (error) => {
         console.error('Login failed:', error);
+        const errorMessage = error.error || 'An error occurred';
         // Handle login error (e.g., show an error message to the user)
+        this.openErrorDialog(errorMessage); // Call a method to open error dialog with the error message
       }
     );
   }
@@ -55,9 +65,17 @@ export class LoginComponent {
   }
 
   ForgotPage(){this.router.navigate(['/forgot']); }
+
+  ReactivatePage(){this.router.navigate(['/Reactivate']); }
   
   RegisterPage()
   {
     this.router.navigate(['/register']); // Redirect to the register page
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 }

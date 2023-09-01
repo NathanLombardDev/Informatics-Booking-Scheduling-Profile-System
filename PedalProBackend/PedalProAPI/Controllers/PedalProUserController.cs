@@ -13,6 +13,14 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
+using Twilio;
+using Twilio.Types;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.TwiML.Voice;
+using Vonage;
+using Vonage.Request;
+using Vonage.Messages.Sms;
+using PedalProAPI.ViewModels;
 
 namespace PedalProAPI.Controllers
 {
@@ -24,13 +32,22 @@ namespace PedalProAPI.Controllers
         private readonly PedalProDbContext _context;
         private readonly IRepository _repsository;
         private readonly UserManager<PedalProUser> _userManager;
+        
+        private readonly IUserClaimsPrincipalFactory<PedalProUser> _claimsPrincipalFactory;
+        private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ILogger<PedalProUserController> _logger;
 
-
-        public PedalProUserController(PedalProDbContext context, IRepository repsository, UserManager<PedalProUser> userManager)
+        
+        public PedalProUserController(PedalProDbContext context, IRepository repsository, UserManager<PedalProUser> userManager, ILogger<PedalProUserController> logger, IUserClaimsPrincipalFactory<PedalProUser> claimsPrincipalFactory, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _context = context;
             _repsository = repsository;
             _userManager = userManager;
+            _claimsPrincipalFactory = claimsPrincipalFactory;
+            _configuration = configuration;
+            _roleManager = roleManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -50,12 +67,83 @@ namespace PedalProAPI.Controllers
             return Ok(roles);
         }
 
+        [HttpGet("GetClientsWithBookings")]
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<ActionResult> GetClientsWithBookings()
+        {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+            var clientIdsWithBookings = await _context.Bookings
+                .Select(booking => booking.ClientId)
+                .Distinct()
+                .ToListAsync();
+
+            var clientsWithBookings = await _context.Clients
+                .Where(client => clientIdsWithBookings.Contains(client.ClientId))
+                .ToListAsync();
+
+            return Ok(clientsWithBookings);
+        }
+
 
         [HttpPost]
         [Route("SendBookingReminder/{clientId}")]
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = "Employee,Admin")]
         public async Task<IActionResult> SendBookingReminder(int clientId)
         {
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var clientbookingRem = await _repsository.GetBookingsReminder(clientId);
 
             if(clientbookingRem!=null)
@@ -135,8 +223,93 @@ namespace PedalProAPI.Controllers
                 return StatusCode(500, "Internal Server Error. Please contact support.");
             }
             return BadRequest("We were unable to complete this request");
+        } 
+
+
+        [HttpPost]
+        [Route("SendBookingReminderTwo/{clientId}")]
+        [Authorize(Roles = "Employee,Admin")]
+        public async Task<IActionResult> SendBookingReminderTwo(int clientId)
+        {
+
+            var clientbookingRem = await _repsository.GetBookingsReminder(clientId);
+
+
+
+            string accountSid = "ACd5e788f9060d80154c2866b6468bb9d1";
+            string authToken = "bb3026c55bca34a6754628315a4633f9";
+
+
+            if (clientbookingRem != null)
+            {
+                var clientClient = await _repsository.GetClientClient(clientId);
+
+                var phoneNum = "+27" + clientClient.ClientPhoneNum;
+                var name = clientClient.ClientName + " " + clientClient.ClientSurname;
+
+                TwilioClient.Init(accountSid, authToken);
+
+                var message = MessageResource.Create(
+                    body: "Dear "+ name+ ",this is a reminder of your booking(s) made at CBT. Please ensure that you arrive on time for your specified timeslot. Kind regards, CBT Team",
+                    from: new Twilio.Types.PhoneNumber("+12722256251"),
+                    to: new Twilio.Types.PhoneNumber(phoneNum)
+                //+12722256251
+                );
+
+                return Ok($"SMS sent with SID: {message.Sid}");
+            }
+            else
+            {
+                return BadRequest("Client does not have a booking under their name");
+            }
+
         }
 
 
+        [HttpPost]
+        [Route("api/send-sms")]
+        public async Task<IActionResult> SendSms(int clientId)
+        {
+            string apiKey = "f0934fee";
+            string apiSecret = "vYQvVR4hdHNPDIx8";
+
+            var clientbookingRem = await _repsository.GetBookingsReminder(clientId);
+
+
+            if (clientbookingRem != null)
+            {
+                var clientClient = await _repsository.GetClientClient(clientId);
+
+                var phoneNum = clientClient.ClientPhoneNum;
+                var name = clientClient.ClientName + " " + clientClient.ClientSurname;
+                var message = "Dear " + name + ",this is a reminder of your booking(s) made at CBT. Please ensure that you arrive on time for your specified timeslot. Kind regards, CBT Team";
+                VonageClient client = new VonageClient(new Credentials
+                {
+                    ApiKey = apiKey,
+                    ApiSecret = apiSecret
+                });
+
+                var response = client.SmsClient.SendAnSms(new Vonage.Messaging.SendSmsRequest
+                {
+                    To = phoneNum,
+                    From = "CBT",
+                    Text = message
+                });
+
+                if (response.Messages[0].Status == "0")
+                {
+                    return Ok("SMS sent successfully.");
+                }
+                else
+                {
+                    return BadRequest("Failed to send SMS.");
+                }
+            }
+            else
+            {
+                return BadRequest("Client does not have a booking under their name");
+            }
+
+        }
     }
 }

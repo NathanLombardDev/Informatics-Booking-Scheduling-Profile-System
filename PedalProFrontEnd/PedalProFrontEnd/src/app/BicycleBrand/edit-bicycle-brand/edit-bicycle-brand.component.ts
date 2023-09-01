@@ -5,6 +5,8 @@ import { VideoType } from '../../Models/video-type';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { BicycleBrand } from '../../Models/bicycle-brand';
 import { ImageType } from '../../Models/image-type';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-bicycle-brand',
@@ -12,8 +14,10 @@ import { ImageType } from '../../Models/image-type';
   styleUrls: ['./edit-bicycle-brand.component.css']
 })
 export class EditBicycleBrandComponent {
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){}
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){}
   
+  selectedFile: File | null = null;
+
   editbrands:BicycleBrand={
     bicycleBrandId:0,
     brandName:'',
@@ -25,6 +29,12 @@ export class EditBicycleBrandComponent {
   //Image into an array
   imagetypes:ImageType[]=[];
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   //On Edit button get bicycle brands
   ngOnInit(): void {
     this.route.paramMap.subscribe({
@@ -35,6 +45,10 @@ export class EditBicycleBrandComponent {
           this.dataservice.GetBicycleBrand(id).subscribe({
             next:(response)=>{
               this.editbrands=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
@@ -57,18 +71,40 @@ export class EditBicycleBrandComponent {
 
   //Update Image Name and Brand Name
   UpdateMaterial(){
-    if(this.editbrands.brandImgName && this.editbrands.brandName && this.editbrands.imageTypeId && this.editbrands.imageUrl)
+    if(this.editbrands.brandImgName && this.editbrands.brandName && this.editbrands.imageTypeId)
     {
       this.dataservice.EditBicycleBrand(this.editbrands.bicycleBrandId,this.editbrands).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }
     else {
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
+  }
+
+  uploadAndAdd(): void {
+    if (this.selectedFile) {
+      this.dataservice.uploadImage(this.selectedFile).subscribe(
+        (response) => {
+          console.log('Image uploaded successfully:', response);
+          console.log(response.url)
+          this.editbrands.imageUrl=response.url;
+          this.UpdateMaterial();
+        },
+        (error) => {
+          console.error('Error uploading image:', error);
+        }
+      );
+    } else {
+      console.log('No image selected.');
+    }
   }
 
   //Cancel button
@@ -89,5 +125,9 @@ export class EditBicycleBrandComponent {
   Logout()
   {
     this.dataservice.logout();
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
   }
 }

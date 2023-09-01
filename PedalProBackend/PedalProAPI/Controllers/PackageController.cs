@@ -1,21 +1,29 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PackageController : ControllerBase
     {
         private readonly IRepository _repsository;
+        private readonly UserManager<PedalProUser> _userManager;
 
-        public PackageController(IRepository repository)
+        public PackageController(IRepository repository, UserManager<PedalProUser> userManager)
         {
 
             _repsository = repository;
+            _userManager = userManager;
         }
 
 
@@ -83,17 +91,21 @@ namespace PedalProAPI.Controllers
         {
             try
             {
+                
+
                 var price = new Price()
                 {
                     Price1 = packageAdd.Price1,
                     PriceDate = DateTime.Now
                 };
                 _repsository.Add(price);
+                await _repsository.SaveChangesAsync();
 
                 var package = new Package()
                 {
                     PackageName = packageAdd.PackageName,
-                    PackageDescription = packageAdd.PackageDescription
+                    PackageDescription = packageAdd.PackageDescription,
+                    NumPackageBookings=packageAdd.packagebookings
                 };
                 _repsository.Add(package);
                 await _repsository.SaveChangesAsync();
@@ -120,10 +132,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditPackage/{packageId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<PedalProRoleViewModel>> EditPackage(int packageId, PackageViewModel packageModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingPackagePrice = await _repsository.GetPackageAssocAsync(packageId);
                 if (existingPackagePrice == null) return NotFound("The package price does not exist");
 
@@ -133,6 +173,7 @@ namespace PedalProAPI.Controllers
 
                 existingPackage.PackageName= packageModel.PackageName;
                 existingPackage.PackageDescription= packageModel.PackageDescription;
+                existingPackage.NumPackageBookings = packageModel.packagebookings;
 
                 existingPrice.Price1 = packageModel.Price1;
                 existingPrice.PriceDate = DateTime.Now;
@@ -153,10 +194,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeletePackage/{packageId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteRole(int packageId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingPackagePrice = await _repsository.GetPackageAssocAsync(packageId);
                 if (existingPackagePrice == null) return NotFound("The package price does not exist");
 
@@ -183,8 +252,6 @@ namespace PedalProAPI.Controllers
             }
             return BadRequest("");
         }
-
-
 
         [HttpGet]
         [Route("GetPrice/{priceId}")]

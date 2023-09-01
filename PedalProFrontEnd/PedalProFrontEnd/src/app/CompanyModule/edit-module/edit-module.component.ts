@@ -6,6 +6,8 @@ import { NgForm } from '@angular/forms';
 import { response } from 'express';
 import { Package } from '../../Models/package';
 import { ModuleStatus } from '../../Models/module-status';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-module',
@@ -28,7 +30,7 @@ export class EditModuleComponent implements OnInit{
   packages:Package[]=[];
   statuses:ModuleStatus[]=[];
 
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
 
   }
   
@@ -42,6 +44,10 @@ export class EditModuleComponent implements OnInit{
           this.dataservice.GetModuleTwo(id).subscribe({
             next:(response)=>{
               this.editModules=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
@@ -52,16 +58,26 @@ export class EditModuleComponent implements OnInit{
     this.GetModStatuses();
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   UpdateModule(){
-    if(this.editModules.trainingModuleName && this.editModules.trainingModuleDescription && this.editModules.PackageId )
+    if(this.editModules.trainingModuleName && this.editModules.trainingModuleDescription )
     {
       this.dataservice.EditModule(this.editModules.trainingModuleId,this.editModules).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }

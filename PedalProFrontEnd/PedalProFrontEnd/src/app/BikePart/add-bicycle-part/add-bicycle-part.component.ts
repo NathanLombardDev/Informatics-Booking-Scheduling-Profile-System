@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { BicyclePart } from '../../Models/bicycle-part';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-bicycle-part',
@@ -9,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./add-bicycle-part.component.css']
 })
 export class AddBicyclePartComponent implements OnInit{
-  constructor(private dataService:PedalProServiceService,private router:Router) { }
+  constructor(private dialog:MatDialog,private dataService:PedalProServiceService,private router:Router) { }
 
   addBicyclePart:BicyclePart={
     bicyclePartId:0,
@@ -18,6 +20,12 @@ export class AddBicyclePartComponent implements OnInit{
 
   ngOnInit(): void {
     
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   //Modal Pop-up
@@ -38,10 +46,14 @@ export class AddBicyclePartComponent implements OnInit{
         next:(course)=>{
           this.openModal();
           //this.router.navigate(['pedalprorole'])
+        },
+        error:(err)=> {
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
   //Cancel button

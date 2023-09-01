@@ -7,6 +7,8 @@ import { BicycleBrand } from '../../Models/bicycle-brand';
 import { TrainingModule } from '../../Models/training-module';
 import { BicycleCategory } from '../../Models/bicycle-category';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-bicycle',
@@ -14,8 +16,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   styleUrls: ['./add-bicycle.component.css']
 })
 export class AddBicycleComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
-  
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  clientDetails: any;
   addBicycles:Bicycle={
     bicycleId:0,
     bicycleName:'',
@@ -27,6 +29,7 @@ export class AddBicycleComponent implements OnInit{
   modules:TrainingModule[]=[];
   categories:BicycleCategory[]=[];
   brands:BicycleBrand[]=[];
+  cartnumber:any;
 
   
 
@@ -34,6 +37,9 @@ export class AddBicycleComponent implements OnInit{
     this.GetModules();
     this.GetBrands();
     this.GetCategories();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
   // get modules method
   GetModules(){
@@ -44,6 +50,18 @@ export class AddBicycleComponent implements OnInit{
       });
     })
     return this.modules;
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
   }
 // get brands method
   GetBrands(){
@@ -65,6 +83,12 @@ export class AddBicycleComponent implements OnInit{
     })
     return this.categories;
   }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
 // add bicycle method
   addBicycle(){
     if(this.addBicycles.bicycleBrandId && this.addBicycles.bicycleCategoryId && this.addBicycles.bicycleName)
@@ -72,10 +96,14 @@ export class AddBicycleComponent implements OnInit{
       this.service.AddBicycle(this.addBicycles).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
   cancel_continue(){

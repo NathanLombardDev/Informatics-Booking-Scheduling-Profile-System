@@ -7,6 +7,8 @@ import { TrainingMaterial } from '../../Models/training-material';
 import { TrainingModule } from '../../Models/training-module';
 import { ModuleTwo } from '../../Models/module-two';
 import { ModuleStatus } from '../../Models/module-status';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-material',
@@ -14,7 +16,7 @@ import { ModuleStatus } from '../../Models/module-status';
   styleUrls: ['./edit-material.component.css']
 })
 export class EditMaterialComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
 
   }
 
@@ -47,12 +49,22 @@ export class EditMaterialComponent implements OnInit{
           })
 
         }
+      },
+      error:(err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     })
 
 
     this.GetModules();
     this.GetVideoTypes();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   //update function
@@ -62,10 +74,14 @@ export class EditMaterialComponent implements OnInit{
       this.dataservice.EditMaterial(this.addMaterials.trainingMaterialId,this.addMaterials).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }

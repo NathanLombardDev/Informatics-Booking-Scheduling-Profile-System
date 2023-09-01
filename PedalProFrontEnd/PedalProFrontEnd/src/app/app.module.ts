@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { NgxDocViewerModule } from 'ngx-doc-viewer'; // Import the module
 
+import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 import { CalendarMonthViewComponent } from 'angular-calendar';
 import { RouterModule } from '@angular/router';
@@ -102,10 +103,28 @@ import { DeleteDialogComponent } from './Dialogs/delete-dialog/delete-dialog.com
 import { MatDialogModule } from '@angular/material/dialog';
 import { AddCartDialogComponent } from './Dialogs/add-cart-dialog/add-cart-dialog.component';
 import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
+import { SuccessCheckoutComponent } from './Cart/success-checkout/success-checkout.component';
+import { UnSuccessfullCheckoutComponent } from './Cart/un-successfull-checkout/un-successfull-checkout.component';
+import { WorkoutReportComponent } from './Reports/workout-report/workout-report.component';
+import { PackageReportComponent } from './Reports/package-report/package-report.component';
+import { BarChartComponent } from './Reports/bar-chart/bar-chart.component';
 
 
 
-
+import { NgChartsModule } from 'ng2-charts';
+import { PopularDaysReportComponent } from './Reports/popular-days-report/popular-days-report.component';
+import { PieChartComponent } from './Reports/pie-chart/pie-chart.component';
+import { SuccessBookingPaymentComponent } from './Bookings/success-booking-payment/success-booking-payment.component';
+import { UnsuccessBookingPaymentComponent } from './Bookings/unsuccess-booking-payment/unsuccess-booking-payment.component';
+import { RevenueReportComponent } from './Reports/revenue-report/revenue-report.component';
+import { PackageListReportComponent } from './Reports/package-list-report/package-list-report.component';
+import { ClientListReportComponent } from './Reports/client-list-report/client-list-report.component';
+import { StaffReportComponent } from './Reports/staff-report/staff-report.component';
+import { ErrorDialogComponent } from './Dialogs/error-dialog/error-dialog.component';
+import { TestingTestingUploadComponent } from './testing-testing-upload/testing-testing-upload.component';
+import { ConfirmationDialogComponent } from './Dialogs/confirmation-dialog/confirmation-dialog.component';
+import { ReactivateAccountComponent } from './ClientDetails/reactivate-account/reactivate-account.component';
+import { RestoreDatabaseComponent } from './Database/restore-database/restore-database.component';
 
 
 
@@ -199,7 +218,25 @@ import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
     ProvideFeedbackComponent,
     DeleteDialogComponent,
     AddCartDialogComponent,
-    ViewCartComponent
+    ViewCartComponent,
+    SuccessCheckoutComponent,
+    UnSuccessfullCheckoutComponent,
+    WorkoutReportComponent,
+    PackageReportComponent,
+    BarChartComponent,
+    PopularDaysReportComponent,
+    PieChartComponent,
+    SuccessBookingPaymentComponent,
+    UnsuccessBookingPaymentComponent,
+    RevenueReportComponent,
+    PackageListReportComponent,
+    ClientListReportComponent,
+    StaffReportComponent,
+    ErrorDialogComponent,
+    TestingTestingUploadComponent,
+    ConfirmationDialogComponent,
+    ReactivateAccountComponent,
+    RestoreDatabaseComponent
   ],
   imports: [
     BrowserModule,
@@ -220,7 +257,9 @@ import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
     MatSidenavModule,
     MaterialModule,
     NgxDocViewerModule,
-    MatDialogModule
+    MatDialogModule,
+    NgChartsModule,
+    NgxExtendedPdfViewerModule
     
   ],
   providers: [DatePipe,PedalProServiceService,

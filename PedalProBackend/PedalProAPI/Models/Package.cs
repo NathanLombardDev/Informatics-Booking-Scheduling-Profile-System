@@ -19,6 +19,10 @@ namespace PedalProAPI.Models
         [Unicode(false)]
         public string? PackageDescription { get; set; }
 
+        [StringLength(50)]
+        [Unicode(false)]
+        public int? NumPackageBookings { get; set; }
+
 
         /*
         [InverseProperty("Package")]

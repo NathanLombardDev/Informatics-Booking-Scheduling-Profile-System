@@ -22,6 +22,8 @@ namespace PedalProAPI.Models
         [Column("WorkoutType_ID")]
         public int? WorkoutTypeId { get; set; }
 
+        public DateTime? WorkoutDate { get; set; }
+
         [ForeignKey("ClientId")]
         //[InverseProperty("Workouts")]
         public virtual Client? Client { get; set; }

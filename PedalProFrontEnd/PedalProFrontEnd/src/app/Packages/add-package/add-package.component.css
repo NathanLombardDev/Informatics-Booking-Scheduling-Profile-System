@@ -22,3 +22,50 @@ mat-icon:hover {
 a.nav-link[aria-current='page']:hover {
   cursor: pointer;
 }
+.wholecontainer{
+    max-width: 300px;
+    text-align: center;
+    padding: 20px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 20px 0 rgb(41, 167, 2);
+  
+  }
+  
+  .wholecontainer input[type="text"],.wholecontainer select
+  {
+    display: block;
+    margin: 0 auto; /* Center the inputs horizontally */
+    
+  }
+  
+  #cancel{
+    background-color: black;
+    color: rgb(219, 0, 0);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: background-color 0.6s ease-in-out;
+  }
+  
+  #submit{
+    background-color: black;
+    color: #199709;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.6s ease-in-out;
+    border-radius: 30px;
+  }
+  
+  #submit:hover{
+    background-color: white;
+    color: #199709;
+    border:black solid 1px;
+  }
+  #cancel:hover{
+    background-color: white;
+    color: rgb(219, 0, 0);
+    border:black solid 1px;
+  }

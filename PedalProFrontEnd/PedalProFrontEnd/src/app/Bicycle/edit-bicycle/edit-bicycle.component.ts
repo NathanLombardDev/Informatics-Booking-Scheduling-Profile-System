@@ -8,6 +8,8 @@ import { NgModule } from '@angular/core';
 import { Bicycle } from '../../Models/bicycle';
 import { BicycleBrand } from '../../Models/bicycle-brand';
 import { BicycleCategory } from '../../Models/bicycle-category';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-bicycle',
@@ -16,11 +18,12 @@ import { BicycleCategory } from '../../Models/bicycle-category';
 })
 export class EditBicycleComponent implements OnInit{
 
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient, private route:ActivatedRoute){}
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient, private route:ActivatedRoute){}
   
   modules:TrainingModule[]=[];
   categories:BicycleCategory[]=[];
   brands:BicycleBrand[]=[];
+  cartnumber:any;
 
 
   editBicycles:Bicycle={
@@ -30,7 +33,7 @@ export class EditBicycleComponent implements OnInit{
     //clientId:1,
     bicycleCategoryId:0
   }
-
+  clientDetails: any;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({
@@ -41,6 +44,9 @@ export class EditBicycleComponent implements OnInit{
           this.service.GetBicycle(id).subscribe({
             next:(response)=>{
               this.editBicycles=response;
+            },error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
@@ -49,6 +55,9 @@ export class EditBicycleComponent implements OnInit{
     this.GetBrands();
     this.GetModules();
     this.GetCategories();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
   // get modules method
   GetModules(){
@@ -59,6 +68,18 @@ export class EditBicycleComponent implements OnInit{
       });
     })
     return this.modules;
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
   }
 // get brands method
   GetBrands(){
@@ -80,6 +101,12 @@ export class EditBicycleComponent implements OnInit{
     })
     return this.categories;
   }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
 // update bicycles method
   UpdateBicycle(){
     if(this.editBicycles.bicycleBrandId && this.editBicycles.bicycleCategoryId && this.editBicycles.bicycleName)
@@ -87,10 +114,15 @@ export class EditBicycleComponent implements OnInit{
     this.service.EditBicycle(this.editBicycles.bicycleId,this.editBicycles).subscribe({
       next:(response)=>{
         this.openModal();
+      },
+      error:(err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     })
     }else {
-      alert('Validation error: Please fill in all fields.');
+      //alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
   }
   cancel_continue(){

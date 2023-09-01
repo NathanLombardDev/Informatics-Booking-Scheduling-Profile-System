@@ -10,16 +10,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            User roles
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="/pedalprorole" >View Roles</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="/pedalprorole/add">Add role</a></li>
-          </ul>
-        </li>
+        
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Clients
@@ -130,9 +121,18 @@
             Reports
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="" >Report 1</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PackageReport" >Package Report</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="">Report 2</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PopularDaysReport">Popular Booking Days Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/RevenueReport">Revenue Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PackageListReport">Package List Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ClientListReport">Client List Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/StaffReport">Staff Report</a></li>
+            
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -140,9 +140,7 @@
             Other
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="" >Backup Database</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="">Restore Database</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/RestoreDatabase">Restore Database</a></li>
             <li><hr class="dropdown-divider"></li>
           <li><a class="nav-link active" aria-current="page" routerLink="/view-managehelp">View Manage Help</a></li>
           <li><hr class="dropdown-divider"></li>
@@ -159,11 +157,13 @@
   </div>
   
 </nav>
-  
-  <div class="container">
+  <br/>
+  <br/>
+  <br/>
+  <div class="wholecontainer">
       
       <br/>
-      <h1 id="HEADING">Current clients</h1>
+      <h1 id="HEADING">Clients with bookings</h1>
       
       <table class="table">
           <thead class="thead-dark">
@@ -183,8 +183,8 @@
                   <td>{{client.clientEmailAddress}}</td>
                   <td>{{this.GetClientType(client.clientTypeId)}}</td>
                   <td></td>
-                  <td><button type="button" class="btn btn-success" (click)="sendReminder(client.clientId)">Send booking reminder</button></td>
-                  <!--<td><button type="button" class="btn btn-danger"  (click)="DeleteRole(role.roleId)">Delete</button></td>-->
+                  <td><button id="submit"  (click)="sendReminder(client.clientId)">Send booking reminder</button></td>
+                  
                   
                   
               </tr>

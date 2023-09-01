@@ -1,3 +1,24 @@
+
+
+.wholecontainer{
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+  
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 0 20px 0 rgb(41, 167, 2);
+}
+
+
+
+body{
+  
+    background-color: black; /* Change to your desired background color */
+    
+  
+}
+
 .search-container {
     display: flex;
     margin-top: 10px;
@@ -61,3 +82,4 @@ a.nav-link.active:hover,
 a.nav-link[aria-current='page']:hover {
 cursor: pointer;
 }
+

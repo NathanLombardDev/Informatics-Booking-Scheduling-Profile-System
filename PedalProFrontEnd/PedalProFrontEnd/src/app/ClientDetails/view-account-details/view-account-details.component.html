@@ -1,13 +1,20 @@
-
-
+<br/>
+<br/>
+<br/>
+<br/>
 <div class="container">
     <mat-icon routerLink="/clientLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
     
     <h2>Account Details</h2>
   
-    <div class="profile-image">
-      <!-- Replace `path_to_your_profile_image` with the actual image path -->
-      <img src="assets/nature.jpg" alt="Profile Image">
+    <div class="profile-image" routerLink="/testingpage">
+      <ng-container *ngIf="clientDetails?.clientProfilePicture; else defaultImage">
+        <img src="{{ clientDetails?.clientProfilePicture }}" alt="Empty" routerLink="/testingpage">
+      </ng-container>
+      <ng-template #defaultImage>
+        <img src="assets/profile.jpg" alt="Default" routerLink="/testingpage">
+      </ng-template>
+      <mat-icon class="icontwo" title="Edit Profile" #icontwo>edit</mat-icon>
     </div>
   
     <div *ngIf="clientDetails; else loadingTemplate">
@@ -15,7 +22,7 @@
     <p><strong>Name:</strong> {{ clientDetails.clientName }}</p>
       <p><strong>Surname:</strong> {{ clientDetails.clientSurname }}</p>
       <p><strong>Phone Number:</strong> {{ clientDetails.clientPhoneNum }}</p>
-      <p><strong>Date of birth:</strong> {{ clientDetails.clientDateOfBirth }}</p>
+      <p><strong>Date of birth:</strong> {{ clientDetails.clientDateOfBirth |date}}</p>
       <p><strong>Email:</strong> {{ clientDetails.clientEmailAddress }}</p>
       <!-- Add other properties here as needed -->
     </div>
@@ -24,8 +31,24 @@
     <button mat-icon-button class="edit-icon" (click)="openEditDialog()">
       <mat-icon>edit</mat-icon>
     </button>
-  </div>
+
+    <button id="submit" (click)="deactivateAccount()">Deactivate account?</button>
+</div>
   
   <ng-template #loadingTemplate>
     <p class="loading-message">Loading...</p>
   </ng-template>
+
+  <div class="modal" id="myModal" style="display: none;" >
+    <div class="modal-dialog" id="Dialog">
+      <div class="modal-content" id="Content">
+        
+        <div class="modal-body" id="modalBody">
+          <h4>Your account has been de-activated, you will be redirected to the login page</h4>
+          <br/>
+          <button type="button" class="btn btn-success" (click)="cancel_continue()" id="continue">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -7,6 +7,8 @@ import { Employee } from 'src/app/Models/employee';
 import { CustomDate } from 'src/app/Models/custom-date';
 import { DatePipe } from '@angular/common'; // Import the DatePipe
 import { DateWithTimeslotDto } from 'src/app/Models/date-with-timeslot-dto';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-timeslot',
@@ -24,16 +26,21 @@ export class AddTimeslotComponent implements OnInit{
 
   employees:Employee[]=[];
 
-  constructor(private service: PedalProServiceService,private router:Router) { }
+  constructor(private dialog:MatDialog,private service: PedalProServiceService,private router:Router) { }
 
   createTimeslot() {
     this.service.addTimeslot(this.dateWithTimeslotDto)
       .subscribe(response => {
         console.log('Timeslot created successfully:', response);
         this.openModal();
-      }, error => {
-        console.error('Error creating timeslot:', error);
+      }, err=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       });
+  }
+
+  getCurrentDate(): Date {
+    return new Date(); // Returns the current date
   }
   
   GetModules(){
@@ -44,6 +51,12 @@ export class AddTimeslotComponent implements OnInit{
       });
     })
     return this.employees;
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
   
 

@@ -1,12 +1,11 @@
 <br/>
 <br/>
 
-<div class="container">
+<div class="wholecontainer">
     <mat-icon routerLink="/forgot" aria-label="Back" id="back">keyboard_backspace</mat-icon>
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
+            
                     <h2 class="mb-4" style="color: black;">Reset Password</h2>
                     <form [formGroup]="resetPasswordForm" (ngSubmit)="onSubmit()">
                         <div class="form-group">
@@ -46,12 +45,10 @@
                         </div>
                         <br/>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary" style="background-color: black;">Reset Password</button>
+                            <button id="submit" type="submit" class="btn btn-primary" >Reset Password</button>
                         </div>
                         <div *ngIf="errorMessage" class="alert alert-danger" style="color: #ff0000;">{{ errorMessage }}</div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
-</div>

@@ -7,6 +7,9 @@ import { map, Observable, Subject } from 'rxjs';
 import { NgModule } from '@angular/core';
 import { Workout } from 'src/app/Models/workout';
 import { WorkoutType } from 'src/app/Models/workout-type';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-workout',
@@ -15,9 +18,10 @@ import { WorkoutType } from 'src/app/Models/workout-type';
 })
 export class WorkoutComponent implements OnInit{
 
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient,private dialog:MatDialog){}
   modules:TrainingModule[]=[];
-  
+  clientDetails: any;
+  cartnumber:any;
   //bicycles:Bicycle[]=[];
   //category:BicycleCategory[]=[];
   workoutType:WorkoutType[]=[];
@@ -32,11 +36,30 @@ export class WorkoutComponent implements OnInit{
       this.numNum++;
     }
   }
-  
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
 
   ngOnInit(): void {
     this.GetWorkouts();
     this.GetModules();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
   // get modules method
   GetModules(){
@@ -83,17 +106,36 @@ export class WorkoutComponent implements OnInit{
 
   DeleteWorkout(id:any)
   {
-    this.service.DeleteWorkout(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.workouts.findIndex((workout)=>workout.workoutId===id);
-        if(index!=-1){
-          this.workouts.slice(index,1);
-        }
-        this.openModal();
-        
-      }
-    })
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this workout?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) { 
+        this.service.DeleteWorkout(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.workouts.findIndex((workout)=>workout.workoutId===id);
+            if(index!=-1){
+              this.workouts.slice(index,1);
+            }
+            this.openModal();
+            
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
+       }
+    });
+    
+    
   }
 
   ReloadPage()

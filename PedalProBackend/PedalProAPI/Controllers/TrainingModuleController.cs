@@ -1,45 +1,107 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class TrainingModuleController : ControllerBase
     {
         private readonly IRepository _repsository;
+        private readonly UserManager<PedalProUser> _userManager;
 
 
-        public TrainingModuleController(IRepository repository)
+        public TrainingModuleController(IRepository repository, UserManager<PedalProUser> userManager)
         {
 
             _repsository = repository;
-
+            _userManager = userManager;
         }
 
 
         [HttpGet]
         [Route("GetAllModules")]
+        [Authorize(Roles = "Client,Admin,Employee")]
         public async Task<IActionResult> GetAllModules()
         {
-            var modules = await _repsository.GetAllTrainingModuleAsync();
-            return Ok(modules);
+                // For admins and employees, retrieve and return all modules
+                var modules = await _repsository.GetAllTrainingModuleAsync();
+                return Ok(modules);
+            
+
         }
 
         [HttpGet]
         [Route("GetModule/{moduleId}")]
+        [Authorize(Roles = "Client,Admin,Employee")]
         public async Task<IActionResult> GetAllModules(int moduleId)
         {
             try
             {
-                var modules = await _repsository.GetTrainingModuleAsync(moduleId);
-                if (modules == null) return NotFound("Training Module does not exist");
-                return Ok(modules);
+
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+
+                if (userRoles.Contains("Client"))
+                {
+                    // If the user is a client, do something specific for clients
+
+                    var client = await _repsository.GetClient(userId);
+
+                    if (client == null)
+                    {
+                        return BadRequest("Client not found.");
+                    }
+
+                    var clientPackages = await _repsository.GetClientPackagesAsync(client.ClientId);
+
+                    if (clientPackages.Any())
+                    {
+                        var modules = await _repsository.GetTrainingModuleAsync(moduleId);
+                        if (modules == null) return NotFound("Training Module does not exist");
+                        return Ok(modules);
+                    }
+                    else
+                    {
+                        // If the client hasn't purchased packages, return modules available to all clients
+                        //var modules = await _repsository.GetAllTrainingModuleAsync();
+                        return BadRequest("You do not have access to this without purchasing a package");
+                    }
+                }
+                else
+                {
+                    var modules = await _repsository.GetTrainingModuleAsync(moduleId);
+                    if (modules == null) return NotFound("Training Module does not exist");
+                    return Ok(modules);
+                }
+
+                
             }
             catch (Exception)
             {
@@ -50,13 +112,42 @@ namespace PedalProAPI.Controllers
         //[Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("AddModule")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddModule(TrainingModuleViewModel moduleAdd)
         {
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var module = new TrainingModule
             {
                 TrainingModuleName = moduleAdd.TrainingModuleName,
                 TrainingModuleDescription = moduleAdd.TrainingModuleDescription,
-                PackageId = moduleAdd.PackageId,
+                //PackageId = moduleAdd.PackageId,
                 TrainingModuleStatusId = moduleAdd.TrainingModuleStatusId
             };
 
@@ -76,17 +167,45 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditModule/{moduleId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<PedalProRoleViewModel>> EditModule(int moduleId, TrainingModuleViewModel moduleModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingModule = await _repsository.GetTrainingModuleAsync(moduleId);
                 if (existingModule == null) return NotFound("The module does not exist");
 
                 existingModule.TrainingModuleName = moduleModel.TrainingModuleName;
                 existingModule.TrainingModuleDescription = moduleModel.TrainingModuleDescription;
                 existingModule.TrainingModuleStatusId = moduleModel.TrainingModuleStatusId;
-                existingModule.PackageId = moduleModel.PackageId;
+                //existingModule.PackageId = moduleModel.PackageId;
 
                 if (await _repsository.SaveChangesAsync())
                 {
@@ -104,11 +223,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteModule/{moduleId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteModule(int moduleId)
         {
 
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
 
                 var existingMaterial = await _repsository.GetTrainingMaatModAsync(moduleId);
                 if (existingMaterial == null) return NotFound($"The material does not exist");
@@ -144,6 +290,7 @@ namespace PedalProAPI.Controllers
         //Training material
         [HttpGet]
         [Route("GetAllTrainingMaterial")]
+        [Authorize(Roles = "Client,Admin,Employee")]
         public async Task<IActionResult> GetAllTrainingMaterial()
         {
             var trainingmaterials = await _repsository.GetAllTrainingMaterialAsync();
@@ -152,6 +299,7 @@ namespace PedalProAPI.Controllers
 
         [HttpGet]
         [Route("GetTrainingMaterial/{trainingMaterialId}")]
+        [Authorize(Roles = "Client,Admin,Employee")]
         public async Task<IActionResult> GetMaterial(int trainingMaterialId)
         {
             try
@@ -168,8 +316,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddTrainingMaterial")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult> AddTrainingMaterial(TrainingMaterialViewModel trainingMaterialModel)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var video = new VideoLink
             {
                 VideoUrl = trainingMaterialModel.VideoUrl,
@@ -180,7 +356,6 @@ namespace PedalProAPI.Controllers
 
             try
             {
-
                 _repsository.Add(video);
                 await _repsository.SaveChangesAsync();
                 var test = await _repsository.GetVideoLinkAsync(video.VideoLinkId);
@@ -207,11 +382,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditTrainingMaterial/{materialId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<PedalProRoleViewModel>> EditTrainingMaterial(int materialId, TrainingMaterialViewModel materialModel)
         {
 
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
 
                 var existingMaterial = await _repsository.GetTrainingMaterialAsync(materialId);
                 if (existingMaterial == null) return NotFound("The material does not exist");
@@ -243,11 +445,39 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteTrainingMaterial/{materialId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteTrainingMaterial(int materialId)
         {
 
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingMaterial = await _repsository.GetTrainingMaterialAsync(materialId);
                 if (existingMaterial == null) return NotFound($"The material does not exist");
 
@@ -273,15 +503,6 @@ namespace PedalProAPI.Controllers
             }
             return BadRequest("Your request is invalid");
         }
-
-
-
-
-
-
-
-
-
 
         //Video types
 
@@ -309,10 +530,6 @@ namespace PedalProAPI.Controllers
                 return StatusCode(500, "Internal Server Error. Please contact support.");
             }
         }
-
-
-
-
 
         [HttpGet]
         [Route("GetAllTrainingContent/{moduleId}")]

@@ -120,15 +120,16 @@ namespace PedalProAPI.Controllers
                     return BadRequest("Client not found.");
                 }
 
-                
+
 
                 var workout = new Workout
                 {
                     ClientId = client.ClientId,
                     Distance = workoutAdd.Distance,
-                    Duration= TimeSpan.Parse(workoutAdd.Duration),
+                    Duration = TimeSpan.Parse(workoutAdd.Duration),
                     HeartRate = workoutAdd.HeartRate,
-                    WorkoutTypeId=workoutAdd.WorkoutTypeId
+                    WorkoutTypeId = workoutAdd.WorkoutTypeId,
+                    WorkoutDate = DateTime.Now
                 };
 
                 _repsository.Add(workout);
@@ -203,8 +204,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddWorkoutType")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddWorkoutType(WorkoutTypeViewModel cvm)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var clientType = new WorkoutType { WorkoutTypeName = cvm.WorkoutTypeName };
 
             try
@@ -222,10 +251,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditWorkoutType/{workoutTypeId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<WorkoutTypeViewModel>> EditWorkoutType(int workoutTypeId, WorkoutTypeViewModel clientModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingclientType = await _repsository.GetWorkoutType(workoutTypeId);
                 if (existingclientType == null) return NotFound($"The workout Type does not exist");
 
@@ -247,10 +304,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteWorkoutType/{workoutTypeId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteWorkoutTypes(int workoutTypeId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingclientType = await _repsository.GetWorkoutType(workoutTypeId);
                 if (existingclientType == null) return NotFound($"The workout type does not exist");
 

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookingType } from 'src/app/Models/booking-type';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 @Component({
   selector: 'app-edit-booking-type',
@@ -8,7 +10,7 @@ import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.servi
   styleUrls: ['./edit-booking-type.component.css']
 })
 export class EditBookingTypeComponent {
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
 
   }
 
@@ -16,10 +18,15 @@ export class EditBookingTypeComponent {
 
   editBookingTypes:BookingType={
     bookingTypeId:0,
-    bookingTypeName:''
+    bookingTypeName:'',
+    price:0
   }
 
-  
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({
@@ -48,10 +55,14 @@ export class EditBookingTypeComponent {
       this.dataservice.EditBookingType(this.editBookingTypes.bookingTypeId,this.editBookingTypes).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=> {
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }

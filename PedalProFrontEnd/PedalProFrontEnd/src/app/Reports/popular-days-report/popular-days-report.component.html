@@ -1,0 +1,62 @@
+
+<br/>
+  <div class="report-container">
+    <mat-icon routerLink="/companyLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    <h1>Popular Days for Bookings Report</h1>
+      
+    <button id="submit" (click)="generatePDF()">Generate PDF</button>
+    <br/>
+    <h4>Preview:</h4>
+    <div  style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background-color: white;">
+    <div id="report-content" class="report-content" style="margin-top: 20px;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <img src="assets/CBT.jpg" style="width: 50px; margin-right: 10px; float: left;" />
+            <em style="font-size: 18px; text-align: center; display: inline-block; margin: 0 auto;"><b>Callan's Bike Tech</b></em>
+            <img src="assets/pedal.png" style="width: 50px; margin-left: 10px; float: right;" />
+          </div>
+        
+          <h4 style="font-size: 24px; text-align: center;">Popular Days for Bookings Report</h4>
+
+          <!-- Grouping Control Breaks by Package Name -->
+          <div class="popular-days-report">
+        
+            <app-pie-chart
+              [pieChartData]="chartData"
+              [pieChartLabels]="chartLabels"
+              [pieChartOptions]="chartOptions">
+            </app-pie-chart>
+          </div>
+          <br/>
+          <br/>
+          <h5 style="text-align: center;">Number of Bookings</h5>
+          <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Sunday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Monday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Tuesday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Wednesday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Thursday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Friday</th>
+                <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Saturday</th>
+             
+              </tr>
+            </thead>
+            <tbody>
+              <tr  style="border: 1px solid #ccc;">
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.sunday}}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.monday }}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.tuesday }}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.wednesday }}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.thursday }}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.friday }}</td>
+                <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ reportDatatwo.saturday }}</td>
+                <!-- Add other columns here -->
+              </tr>
+            </tbody>
+          </table>
+        
+      </div>
+    </div>
+</div>

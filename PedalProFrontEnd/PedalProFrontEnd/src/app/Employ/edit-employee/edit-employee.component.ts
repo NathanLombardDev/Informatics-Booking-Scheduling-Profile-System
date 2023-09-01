@@ -7,6 +7,8 @@ import { PedalProRole } from 'src/app/Models/pedal-pro-role';
 import { EmployeeStatus } from '../../Models/employee-status';
 import { EmployeeType } from '../../Models/employee-type';
 import { UpdateEmployee } from 'src/app/Models/update-employee';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-employee',
@@ -14,7 +16,7 @@ import { UpdateEmployee } from 'src/app/Models/update-employee';
   styleUrls: ['./edit-employee.component.css']
 })
 export class EditEmployeeComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
 
   }
 
@@ -46,6 +48,10 @@ export class EditEmployeeComponent implements OnInit{
           this.dataservice.GetEmployee(id).subscribe({
             next:(response)=>{
               this.editEmployees=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
@@ -57,6 +63,12 @@ export class EditEmployeeComponent implements OnInit{
     this.GetRoles();
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   //Update Employee Details
   UpdateEmployee(){
     if(this.editEmployees.empName  && this.editEmployees.empPhoneNum && this.editEmployees.empSurname && this.editEmployees.empStatusId && this.editEmployees.empTitle &&  this.editEmployees.empTypeId)
@@ -64,10 +76,14 @@ export class EditEmployeeComponent implements OnInit{
       this.dataservice.EditEmployee(this.editEmployees.employeeId,this.editEmployees).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }// Redirect to View Employee Screen

@@ -11,17 +11,32 @@ namespace PedalProAPI.Repositories
         Task<bool> SaveChangesAsync();
 
         // Role
+        /*
         Task<PedalProRole[]> GetAllRoleAsync();
 
         Task<PedalProRole> GetRoleAsync(int roleId);
+        */
 
+        Task<ClientPackage[]> GetClientPackagesAsync(int clientId);
 
         //Employee type
         Task<EmployeeType[]> GetAllEmployeeTypeAsync();
 
         Task<EmployeeType> GetEmployeeTypeAsync(int employeeTypeId);
 
+        Task<BrandImage> GetbrandImageAsync(int brandImageId);
+        //Setup
+        Task<Setup> GetSetup(int setupId);
 
+        Task<Service> GetService(int serviceid);
+
+        Task<TrainingSession> GettrainingSession(int sessionId);
+
+        Task<BookingRevenue> GetBookingRevenue(string name);
+
+        Task<Administrator> GetAdmin(string userId);
+
+        Task<Schedule> GetScheduleThird(int ScheduleId);
         //Booking
         Task<Booking[]> GetAllBookingAsync();
 
@@ -34,12 +49,18 @@ namespace PedalProAPI.Repositories
         Task<Employee> GetEmployeeAsync(int employeeId);
 
 
+        //
+        Task<List<Workout>> GetWorkoutDataBetweenDates(DateTime startDate, DateTime endDate, int clientId);
 
 
         //Employee status 
         Task<EmployeeStatus[]> GetAllEmployeeStatusAsync();
 
         Task<EmployeeStatus> GetEmployeeStatusAsync(int employeeStatusId);
+
+
+        //
+        Task<Checkout[]> GetAllCheckouts();
 
 
 
@@ -78,6 +99,8 @@ namespace PedalProAPI.Repositories
 
         //Price
         Task<Price> GetPriceAsync(int priceId);
+
+        Task<Price[]> GetPrices();
         Task<PackagePrice[]> GetAllPackagePriceAsync();
 
 
@@ -214,6 +237,20 @@ namespace PedalProAPI.Repositories
         //Cart
         Task<Cart> GetCartOne(int cartId);
         Task<Cart> GetCartWithPackages(int cartId);
+
+        Task<PackageRevenue> GetPackageRevenue(string name);
+
+        Task<Package> GetPackageName(string name);
+
+        Task<PackageRevenue[]> GetAllPackageRevenuesAsync();
+
+        Task<Schedule[]> GetAllSchedulesAsync();
+
+        Task<BookingRevenue[]> GetAllBookingrevenue();
+
+        Task<BookingType> GetBookingTypeName(string name);
+
+        Task<Employee> GetEmployee(string userId);
 
     }
 }

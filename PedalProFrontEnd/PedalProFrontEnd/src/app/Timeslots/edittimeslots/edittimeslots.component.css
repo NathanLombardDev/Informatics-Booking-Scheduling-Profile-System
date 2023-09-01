@@ -5,3 +5,23 @@ mat-icon:hover {
 a.nav-link[aria-current='page']:hover {
   cursor: pointer;
 }
+input,select{
+  width:fit-content;
+  display: block;
+    margin: 0 auto; /* Center the inputs horizontally */
+}
+#submit{
+  background-color: black;
+  color: #199709;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.6s ease-in-out;
+  border-radius: 30px;
+  text-align: center;
+}
+#submit:hover{
+  background-color: white;
+  color: #199709;
+  border:black solid 1px;
+}

@@ -7,6 +7,10 @@ import { map, Observable, Subject } from 'rxjs';
 import { NgModule } from '@angular/core';
 import { EmployeeType } from '../../Models/employee-type';
 import { EmployeeStatus } from '../../Models/employee-status';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
+
 
 @Component({
   selector: 'app-employee',
@@ -14,7 +18,7 @@ import { EmployeeStatus } from '../../Models/employee-status';
   styleUrls: ['./employee.component.css']
 })
 export class EmployeeComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){
   }
   //Employee Array
   employees:Employee[]=[];
@@ -35,6 +39,12 @@ export class EmployeeComponent implements OnInit{
       });
     })
     return this.employees;
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   //Filter out the table
@@ -90,17 +100,36 @@ export class EmployeeComponent implements OnInit{
   //Remove employee from system
   DeleteEmployee(id:any)
   {
-    this.service.DeleteEmployee(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.employees.findIndex((employee)=>employee.employeeId===id);
-        if(index!=-1){
-          this.employees.slice(index,1);
-        }
-        this.openModal();
-        
-      }
-    })
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to permenantely delete this employee?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) { 
+        this.service.DeleteEmployee(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.employees.findIndex((employee)=>employee.employeeId===id);
+            if(index!=-1){
+              this.employees.slice(index,1);
+            }
+            this.openModal();
+            
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
+       }
+    });
+    
+    
   }
 
 

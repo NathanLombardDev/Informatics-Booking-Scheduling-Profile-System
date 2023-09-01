@@ -1,0 +1,52 @@
+<br/>
+<br/>
+<br/>
+
+
+<div class="report-container">
+    <mat-icon routerLink="/companyLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    <h1>List of Clients Report</h1>
+      
+      
+    <button id="submit" (click)="generatePDF()">Generate PDF</button>
+    <br/>
+    <h4>Preview:</h4>
+    <div  style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background-color: white;">
+    <div id="report-content" class="report-content" style="margin-top: 20px;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <img src="assets/CBT.jpg" style="width: 50px; margin-right: 10px; float: left;" />
+            <em style="font-size: 18px; text-align: center; display: inline-block; margin: 0 auto;"><b>Callan's Bike Tech</b></em>
+            <img src="assets/pedal.png" style="width: 50px; margin-left: 10px; float: right;" />
+          </div>
+        <br/>
+        <br/>
+        <br/>
+        <h4 style="font-size: 24px; text-align: center;">List of Clients</h4>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Name</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Surname</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Email</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Type</th>
+              
+            
+            </tr>
+          </thead>
+          <tbody *ngIf="clients.length>0;else noRolesFound">
+            <tr *ngFor="let workout of clients" style="border: 1px solid #ccc;">
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{workout.clientName}}</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{workout.clientSurname}}</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{workout.clientEmailAddress}}</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{this.GetClientType(workout.clientTypeId)}}</td>
+              
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noRolesFound>
+            <div class="alert">No clients found.</div>
+          </ng-template>
+    </div>
+</div>
+

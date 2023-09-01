@@ -16,6 +16,7 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
+using Vonage.Users;
 
 namespace PedalProAPI.Controllers
 {
@@ -73,9 +74,7 @@ namespace PedalProAPI.Controllers
                         }
 
                         // Assign role to the user
-                        await _userManager.AddToRoleAsync(user, "Client");
-
-                        
+                        await _userManager.AddToRoleAsync(user, "Client");  
                     }
                     else
                     {
@@ -85,7 +84,7 @@ namespace PedalProAPI.Controllers
                 }
                 else
                 {
-                    return Forbid("Account already exists.");
+                    return BadRequest("Account already exists.");
                 }
                 var client = new Client
                 {
@@ -97,8 +96,10 @@ namespace PedalProAPI.Controllers
                     ClientDateOfBirth = uvm.ClientDateOfBirth,
                     ClientPhoneNum = uvm.ClientPhoneNum,
                     ClientPhysicalAddress = uvm.ClientPhysicalAddress,
-                    ClientProfilePicture = "Photo",
-                    ClientTitle = uvm.ClientTitle
+                    ClientProfilePicture = null,
+                    ClientTitle = uvm.ClientTitle,
+                    IsActive = true,
+                    NumBookingsAllowance=0
                     // Set other properties as needed
                 };
 
@@ -128,17 +129,35 @@ namespace PedalProAPI.Controllers
         {
             var user = await _userManager.FindByNameAsync(uvm.EmailAddress);
 
+           
+
             if (user != null && await _userManager.CheckPasswordAsync(user, uvm.Password))
             {
                 try
                 {
-                    // Retrieve user roles
+
                     var roles = await _userManager.GetRolesAsync(user);
 
-                    // Generate JWT token
-                    var token = GenerateJWTToken(user, roles);
+                    if (roles.Contains("Client"))
+                    {
+                        var client = await _repository.GetClient(user.Id);
+                        if (client.IsActive == false)
+                        {
+                            return BadRequest("Your account has been deactivated.");
+                        }
+                        else
+                        {
+                            var token = GenerateJWTToken(user, roles);
+                            return Ok(token);
+                        }
 
-                    return Ok(token);
+                    }
+                    else
+                    {
+                        var token = GenerateJWTToken(user, roles);
+                        return Ok(token);
+                    }
+
                 }
                 catch (Exception)
                 {
@@ -184,11 +203,10 @@ namespace PedalProAPI.Controllers
         [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string emailAddress)
         {
-            // Check if the email address exists in the system
+          
             var user = await _userManager.FindByEmailAsync(emailAddress);
             if (user == null)
             {
-                // Return a not found response or a message indicating the email doesn't exist
                 return NotFound("Email address not found.");
             }
 
@@ -208,54 +226,170 @@ namespace PedalProAPI.Controllers
                        $"<h2>{resetCode}</h2>"
             };
 
-            // Send the email
+
             using var smtp = new SmtpClient();
             smtp.Connect("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
             smtp.Authenticate("nathantheawsome1234@gmail.com", "fanmgdiiigkpjnsc");
             smtp.Send(email);
             smtp.Disconnect(true);
 
-            // Return a success response or a message indicating the email was sent
-            return Ok("Password reset code sent successfully. Please check your email for the reset code.");
+            
+
+            return Ok(new {message= "Password reset code sent successfully. Please check your email for the reset code." });
         }
 
         [HttpPost]
         [Route("ResetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            // Check if the model is valid
             if (!ModelState.IsValid)
             {
-                // Return a bad request response with validation errors
                 return BadRequest(ModelState);
             }
 
-            // Find the user by email
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                // Return a not found response or a message indicating the email doesn't exist
                 return NotFound(new { message = "Email address not found." });
             }
 
-            // Reset the user's password using the provided code
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
 
             if (result.Succeeded)
             {
-                // Password reset successful, return a success response or any other appropriate response
                 return Ok(new { message = "Password reset successful. You can now log in with the new password." });
             }
             else
             {
-                // Password reset failed, return the errors in the response
                 var errors = result.Errors.Select(error => error.Description);
                 return BadRequest(new { errors });
             }
         }
 
+        [HttpPut]
+        [Route("ReactivateAccount")]
+        public async Task<IActionResult> ReactivateAccount(LoginViewModel uvm)
+        {
+            var user = await _userManager.FindByNameAsync(uvm.EmailAddress);
 
-        
+            try
+            {
 
+                if (user != null && await _userManager.CheckPasswordAsync(user, uvm.Password))
+                {
+
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains("Client"))
+                    {
+                        var client = await _repository.GetClient(user.Id);
+                        if (client.IsActive == false)
+                        {
+                            client.IsActive = true;
+                            await _repository.SaveChangesAsync();
+
+                           
+                            var message = "Your account has been reactivated.";
+                            var responseObject = new { Message = message };
+                            return Ok(responseObject);
+                        }
+                        else
+                        {
+                            var message = "Your account is already active";
+                            var responseObject = new { Message = message };
+                            return Ok(responseObject);
+                        }
+
+                    }
+                    else
+                    {
+                        return BadRequest("You have not been registered as a client");
+                    }
+                }
+                else
+                {
+                    return NotFound("User does not exist or incorrect password.");
+                }
+
+
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please contact support.");
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateAdmin")]
+        public async Task<IActionResult> CreateAdmin(UserViewModel uvm)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(uvm.EmailAddress);
+
+                if (user == null)
+                {
+                    user = new PedalProUser
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = uvm.EmailAddress,
+                        Email = uvm.EmailAddress
+                    };
+
+                    var result = await _userManager.CreateAsync(user, uvm.Password);
+
+                    if (result.Succeeded)
+                    {
+                        // Check if the role "Client" exists
+                        var clientRoleExists = await _roleManager.RoleExistsAsync("Admin");
+
+                        if (!clientRoleExists)
+                        {
+                            // Create the role "Client"
+                            var clientRole = new IdentityRole("Admin");
+                            await _roleManager.CreateAsync(clientRole);
+                        }
+
+                        // Assign role to the user
+                        await _userManager.AddToRoleAsync(user, "Admin");
+
+
+                    }
+                    else
+                    {
+                        // Return a BadRequest response with the validation errors
+                        return BadRequest(result.Errors);
+                    }
+                }
+                else
+                {
+                    return Forbid("Account already exists.");
+                }
+                var admin = new Administrator
+                {
+                    UserId = user.Id,
+                    AdminEmail = uvm.EmailAddress,
+                    AdminName = uvm.ClientName,
+                    AdminSurname = uvm.ClientSurname,
+                    AdminPhoneNum = uvm.ClientPhoneNum,
+                    Title = uvm.ClientTitle,
+                    // Set other properties as needed
+                };
+
+                // Add the client to the database
+                _repository.Add(admin);
+                await _repository.SaveChangesAsync();
+
+                return Ok(admin);
+            }
+
+            catch (Exception ex)
+            {
+                // Log the exception
+                _logger.LogError(ex, "An error occurred during user registration.");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please contact support.");
+            }
+        }
     }
 }

@@ -4,7 +4,11 @@ import { Cart } from 'src/app/Models/cart';
 import { PackagePrice } from 'src/app/Models/package-price';
 import { Price } from 'src/app/Models/price';
 import { TrainingModule } from 'src/app/Models/training-module';
-
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { ConfirmationDialogComponent } from 'src/app/Dialogs/confirmation-dialog/confirmation-dialog.component';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-view-cart',
@@ -13,7 +17,7 @@ import { TrainingModule } from 'src/app/Models/training-module';
 })
 export class ViewCartComponent implements OnInit{
   cartItems: any[] = [];
-
+  clientDetails: any;
   cartId:number=0;
 
   cart:Cart|undefined;
@@ -25,9 +29,11 @@ export class ViewCartComponent implements OnInit{
   cartnumber:any;
 
   modules:TrainingModule[]=[];
+
+  cartcart:any;
   
 
-  constructor(private service:PedalProServiceService) {}
+  constructor(private service:PedalProServiceService,private router:Router,private dialog:MatDialog) {}
 
   ngOnInit(): void {
     //this.cartItems = this.cartService.getCartItems(); // Replace with your actual logic
@@ -40,7 +46,8 @@ export class ViewCartComponent implements OnInit{
           console.log(this.cart)
         },
         (error) => {
-          console.error('Error fetching cart:', error);
+          const errorMessage=error.error;
+          this.openErrorDialog(errorMessage);
         }
       );
     }
@@ -49,7 +56,27 @@ export class ViewCartComponent implements OnInit{
     this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
 
     this.GetModules();
+
+    this.fetchClientDetails();
     
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   GetPackagePrice(id:any){
@@ -91,8 +118,8 @@ export class ViewCartComponent implements OnInit{
         window.location.href = response.paymentUrl;
       },
       error => {
-        console.error('Error initiating payment:', error);
-        // Handle the error, show a message, etc.
+        const errorMessage=error.error;
+        this.openErrorDialog(errorMessage);
       }
     );
   }
@@ -128,10 +155,64 @@ export class ViewCartComponent implements OnInit{
     
   }
 
+  onRemovePackage(id:any): void {
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to remove this package from your cart?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+    
+    dialogRef.afterClosed().subscribe((result) =>{
+      if (result) { 
+        this.service.removePackageFromCart(this.cartId, id)
+        .subscribe(
+          (cart: Cart) => {
+            this.cart = cart;
+            const currentValue = localStorage.getItem('cartQuantity');
+  
+          if (currentValue !== null) {
+          // Convert the current value to a number and subtract 1
+          const newValue = parseInt(currentValue, 10) - 1;
+  
+          // Update localStorage with the new value
+          localStorage.setItem('cartQuantity', newValue.toString());
+          }
+            console.log('Package removed from cart:', this.cart);
+            this.openModal();
+            
+          },
+          error => {
+            const errorMessage=error.error;
+            this.openErrorDialog(errorMessage);
+          }
+        );
+        
+       }
+    });
+
+  }
+
   Logout()
   {
     this.service.logout();
     
+  }
+
+  openModal()
+  {
+    const modelDiv=document.getElementById('myModal');
+    if(modelDiv!=null)
+    {
+      modelDiv.style.display='block';
+    }
+  }
+
+  ReloadPage()
+  {
+    location.reload();
   }
 
   GetModules(){

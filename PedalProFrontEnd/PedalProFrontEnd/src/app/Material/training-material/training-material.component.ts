@@ -5,6 +5,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { TrainingMaterial } from '../../Models/training-material';
 import { TrainingModule } from '../../Models/training-module';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
+
 
 @Component({
   selector: 'app-training-material',
@@ -16,7 +20,7 @@ export class TrainingMaterialComponent implements OnInit{
   searchTerm:string='';
   module:TrainingModule[]=[];
 
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){
     
   }
 
@@ -36,6 +40,12 @@ export class TrainingMaterialComponent implements OnInit{
     
     return this.materials;
     
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   //filter for search
@@ -70,17 +80,33 @@ export class TrainingMaterialComponent implements OnInit{
   //delete function
   DeleteMaterial(id:any)
   {
-    this.service.DeleteMaterial(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.materials.findIndex((material)=>material.trainingMaterialId===id);
-        if(index!=-1){
-          this.materials.slice(index,1);
-        }
-        this.openModal();
-        
-      }
-    })
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this material with its corresponding?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) { 
+        this.service.DeleteMaterial(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.materials.findIndex((material)=>material.trainingMaterialId===id);
+            if(index!=-1){
+              this.materials.slice(index,1);
+            }
+            this.openModal();
+            
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
+       }
+    });
   }
 
   ReloadPage()

@@ -30,9 +30,25 @@ export class CalendarComponent implements OnInit{
   ngOnInit() {
     this.updateCalendar();
     this.GetModules();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
-
+  clientDetails: any;
   currentMonth: Date = new Date();
+  cartnumber:any;
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        //this.openErrorDialog(errorMessage);
+      }
+    );
+  }
 
   getDaysInMonth(month: Date): any[] {
     const firstDayOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);

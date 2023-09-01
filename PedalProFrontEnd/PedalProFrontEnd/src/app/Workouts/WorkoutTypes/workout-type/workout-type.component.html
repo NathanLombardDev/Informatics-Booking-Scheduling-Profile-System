@@ -159,7 +159,10 @@
   </div>
   
 </nav>
-  <div class="container">
+<br/>
+<br/>
+<br/>
+  <div class="wholecontainer">
     
     <br/>
     <h1 id="HEADING">Workout Types</h1>
@@ -175,8 +178,8 @@
         <tbody *ngIf="clientTypes.length>0;else noClientTypesFound">
             <tr *ngFor="let clientType of clientTypes">
                 <td>{{clientType.workoutTypeName}}</td>
-                <td><button type="button" class="btn btn-success" [routerLink]="['/WorkoutType','edit',clientType.workoutTypeId]" >Update</button></td>
-                <td><button type="button" class="btn btn-danger" (click)="DeleteEmpType(clientType.workoutTypeId)">Delete</button></td>
+                <td><button mat-icon-button [routerLink]="['/WorkoutType','edit',clientType.workoutTypeId]"><mat-icon>edit</mat-icon></button></td>
+                <td><button mat-icon-button (click)="DeleteEmpType(clientType.workoutTypeId)" ><mat-icon>delete</mat-icon></button></td>
             </tr>
         </tbody>
     </table>

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { EmployeeType } from '../../Models/employee-type';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-employee-type',
@@ -15,7 +17,7 @@ export class EditEmployeeTypeComponent implements OnInit{
     empTypeDescription:''
   }
 
-  constructor(private route:ActivatedRoute, private service:PedalProServiceService, private router:Router){}
+  constructor(private dialog:MatDialog,private route:ActivatedRoute, private service:PedalProServiceService, private router:Router){}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({
@@ -27,11 +29,21 @@ export class EditEmployeeTypeComponent implements OnInit{
           this.service.GetEmployeetype(id).subscribe({
             next:(response)=>{
               this.editEmpTypes=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
       }
     })
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   openModal()
@@ -50,10 +62,14 @@ export class EditEmployeeTypeComponent implements OnInit{
       this.service.EditEmployeeType(this.editEmpTypes.empTypeId,this.editEmpTypes).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{//error
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }

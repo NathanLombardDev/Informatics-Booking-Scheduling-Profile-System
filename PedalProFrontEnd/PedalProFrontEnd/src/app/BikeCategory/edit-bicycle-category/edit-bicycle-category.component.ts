@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { BicycleCategory } from '../../Models/bicycle-category';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-bicycle-category',
@@ -9,12 +11,14 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./edit-bicycle-category.component.css']
 })
 export class EditBicycleCategoryComponent implements OnInit{
-  constructor(private route:ActivatedRoute, private service:PedalProServiceService, private router:Router){}
+  constructor(private dialog:MatDialog,private route:ActivatedRoute, private service:PedalProServiceService, private router:Router){}
 
   editBicycleCat:BicycleCategory={
     bicycleCategoryId:0,
     bicycleCategoryName:''
   }
+
+  
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({
@@ -26,13 +30,17 @@ export class EditBicycleCategoryComponent implements OnInit{
           this.service.GetBicycleCategory(id).subscribe({
             next:(response)=>{
               this.editBicycleCat=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
         }
       }
     })
   }
-
+  
   openModal()
   {
     const modelDiv=document.getElementById('myModal');
@@ -48,12 +56,22 @@ export class EditBicycleCategoryComponent implements OnInit{
       this.service.EditBicycleCategory(this.editBicycleCat.bicycleCategoryId,this.editBicycleCat).subscribe({
         next:(response)=>{
           this.openModal();
-        }
+        },
+        error:(err) =>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
+        },
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   cancel_continue(){

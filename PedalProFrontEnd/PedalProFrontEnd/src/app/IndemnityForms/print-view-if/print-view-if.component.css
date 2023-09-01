@@ -31,17 +31,36 @@ a.nav-link[aria-current='page']:hover {
 .download-btn {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #0edb3a; /* Blue color, you can change it to your preferred color */
-    color: #fff; /* White text color */
+    background-color: black;
+    color: #199709;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s ease-in-out;
+    border-radius: 30px;
+    transition: background-color 0.3s ease-in-out;
     text-align: center;
   }
   
   .download-btn:hover {
-    background-color: black; /* Darker shade of blue on hover */
+    background-color: white; /* Darker shade of blue on hover */
+    color: #199709;
+    border: solid black 1px;
   }
 
+  #cancel{
+    background-color: black;
+    color: rgb(219, 0, 0);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 30px;
+  }
   
+  #submit{
+    background-color: black;
+    color: #199709;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+   
+    border-radius: 30px;
+  }

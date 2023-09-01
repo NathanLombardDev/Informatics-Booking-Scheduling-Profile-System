@@ -17,7 +17,7 @@
         
 
         <div class="login-container">
-            <h2>Login</h2>
+            
             <form class="login-form" (ngSubmit)="onLogin()">
               <div>
                 <label for="email">Email:</label>
@@ -31,6 +31,8 @@
             </form>
             
             <button class="forgot-button" (click)="ForgotPage()">Forgot password?</button>
+            <br/>
+            <button class="forgot-button" (click)="ReactivatePage()">Account deactivated?</button>
         </div>
     </div>
     <div class="flex-grow-1" style="width: 40%; background-color: #33a11f; text-align: center;">
@@ -52,7 +54,7 @@
         <br/>
         <br/>
         <div id="second">
-            <button type="submit" class="btn" (click)="RegisterPage()" style="margin-right: 6px; background-color:white; border: 1px solid black;">Register now</button>
+            <button id="secondsecond" type="submit" class="btn" (click)="RegisterPage()" >Register now</button>
         </div>
     </div>
 </div>

@@ -1,20 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class HelpController : ControllerBase
     {
         private readonly IRepository _repsository;
+        private readonly UserManager<PedalProUser> _userManager;
 
-        public HelpController(IRepository repository)
+        public HelpController(IRepository repository, UserManager<PedalProUser> userManager)
         {
             _repsository = repository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -43,8 +51,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddHelp")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddHelp(HelpViewModel helpAdd)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var help = new Help
             {
                 HelpName = helpAdd.HelpName,
@@ -67,8 +103,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditHelp/{helpId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<HelpViewModel>> UpdateHelp(int helpId, HelpViewModel helpModel)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             try
             {
                 var existingHelp = await _repsository.GetHelpAsync(helpId);
@@ -96,8 +160,36 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteHelp/{helpId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHelp(int helpId)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             try
             {
                 var existingHelp = await _repsository.GetHelpAsync(helpId);

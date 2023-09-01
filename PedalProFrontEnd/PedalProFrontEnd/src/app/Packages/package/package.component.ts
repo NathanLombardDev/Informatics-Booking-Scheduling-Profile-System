@@ -7,14 +7,16 @@ import { map, Observable, Subject } from 'rxjs';
 import { NgModule } from '@angular/core';
 import { PackagePrice } from '../../Models/package-price';
 import { Price } from '../../Models/price';
-
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 @Component({
   selector: 'app-package',
   templateUrl: './package.component.html',
   styleUrls: ['./package.component.css']
 })
 export class PackageComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){
   }
 
   packagePrices:PackagePrice[]=[];
@@ -25,6 +27,12 @@ export class PackageComponent implements OnInit{
 
   ngOnInit(): void {
     this.GetPackagePrices();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   GetPackagePrices(){
@@ -93,17 +101,36 @@ export class PackageComponent implements OnInit{
 
   DeletePackage(id:any)
   {
-    this.service.DeletePackage(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.packagePrices.findIndex((packagePrice)=>packagePrice.packageId===id);
-        if(index!=-1){
-          this.packagePrices.slice(index,1);
-        }
-        this.openModal();
-        
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this package?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {  
+        this.service.DeletePackage(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.packagePrices.findIndex((packagePrice)=>packagePrice.packageId===id);
+            if(index!=-1){
+              this.packagePrices.slice(index,1);
+            }
+            this.openModal();
+            
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
       }
-    })
+    });
+    
+    
   }
 
   ReloadPage()

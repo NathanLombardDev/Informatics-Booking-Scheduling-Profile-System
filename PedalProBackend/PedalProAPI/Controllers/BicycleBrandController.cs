@@ -6,22 +6,33 @@ using MimeKit;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class BicycleBrandController : ControllerBase
     {
         private readonly IRepository _repsository;
+        private readonly UserManager<PedalProUser> _userManager;
 
-        public BicycleBrandController(IRepository repository)
+        public BicycleBrandController(IRepository repository, UserManager<PedalProUser> userManager)
         {
             _repsository = repository;
+            _userManager = userManager;
         }
 
         [HttpGet]
         [Route("GetAllBicycleBrands")]
+        
         public async Task<IActionResult> GetAllBicycleBrands()
         {
             var bicycleBrands = await _repsository.GetAllBicycleBrandAsync();
@@ -46,8 +57,35 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddBicycleBrand")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddBicycleBrand(BicycleBrandViewModel brandAdd)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
 
             var brandImage = new BrandImage
             {
@@ -82,14 +120,39 @@ namespace PedalProAPI.Controllers
         }
 
 
-
         [HttpPut]
         [Route("EditBicycleBrand/{bicycleBrandId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<PedalProRoleViewModel>> EditBicycleBrand(int bicycleBrandId, BicycleBrandViewModel brandModel)
         {
 
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
 
                 var existingBicycleBrand= await _repsository.GetBicycleBrandAsync(bicycleBrandId);
                 if (existingBicycleBrand == null) return NotFound("The bicycle brand does not exist");
@@ -101,7 +164,7 @@ namespace PedalProAPI.Controllers
                 existingBrandImage.ImageTypeId = brandModel.ImageTypeId;
                 existingBrandImage.BrandImgName = brandModel.BrandImgName;
                 existingBrandImage.ImageUrl = brandModel.ImageUrl;
-
+                await _repsository.SaveChangesAsync();
 
                 existingBicycleBrand.BrandName = brandModel.BrandName;
                 existingBicycleBrand.BrandImageId= existingBrandImage.BrandImageId;
@@ -118,13 +181,42 @@ namespace PedalProAPI.Controllers
             return BadRequest("Your request is invalid");
         }
 
+
+
         [HttpDelete]
         [Route("DeleteBicycleBrand/{bicycleBrandId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteTrainingMaterial(int bicycleBrandId)
         {
 
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingBicycleBrand = await _repsository.GetBicycleBrandAsync(bicycleBrandId);
                 if (existingBicycleBrand == null) return NotFound("The bicycle brand does not exist");
 
@@ -175,5 +267,60 @@ namespace PedalProAPI.Controllers
                 return StatusCode(500, "Internal Server Error. Please contact support.");
             }
         }
+
+        [HttpGet]
+        [Route("GetBrandImage/{brandImageId}")]
+        public async Task<IActionResult> GetBrandImage(int brandImageId)
+        {
+            try
+            {
+                var result = await _repsository.GetBrandImageAsync(brandImageId);
+                if (result == null) return NotFound("Brand image does not exist");
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal Server Error. Please contact support.");
+            }
+        }
+
+       
+
+        [HttpPost]
+        [Route("TestImageUpload")]
+        public async Task<IActionResult> TestImageUpload(IFormFile file)
+        {
+            try
+            {
+                if (file != null && file.Length > 0)
+                {
+                    // Configure your Cloudinary account
+                    Account account = new Account(
+                        "dcpmharuk",
+                        "183493828529672",
+                        "869tkBTJoV1UmiO0ubhatZ5rNSs"
+                    );
+
+                    Cloudinary cloudinary = new Cloudinary(account);
+
+                    // Upload the image to Cloudinary
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(file.FileName, file.OpenReadStream())
+                    };
+
+                    var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                    return Ok(uploadResult);
+                }
+
+                return BadRequest("No image uploaded.");
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal Server Error. Please contact support.");
+            }
+        }
+        
     }
 }

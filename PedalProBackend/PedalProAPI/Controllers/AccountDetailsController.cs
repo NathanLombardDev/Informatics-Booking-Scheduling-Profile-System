@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +10,7 @@ using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
 using System.Data;
 using System.Security.Claims;
+using System;
 
 namespace PedalProAPI.Controllers
 {
@@ -55,25 +58,6 @@ namespace PedalProAPI.Controllers
                     return BadRequest("User not found.");
                 }
 
-                // Update the user's email if provided
-                if (!string.IsNullOrEmpty(uvm.EmailAddress))
-                {
-                    user.Email = uvm.EmailAddress;
-                    user.UserName = uvm.EmailAddress;
-                }
-
-                // Update the user's password if provided
-                if (!string.IsNullOrEmpty(uvm.Password))
-                {
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var result = await _userManager.ResetPasswordAsync(user, token, uvm.Password);
-
-                    if (!result.Succeeded)
-                    {
-                        return BadRequest(result.Errors);
-                    }
-                }
-
                 // Update other user details if provided (e.g., first name, last name, etc.)
                 // Update as needed based on your data model
 
@@ -95,9 +79,17 @@ namespace PedalProAPI.Controllers
                     client.ClientSurname = uvm.ClientSurname;
                 }
 
-                if (uvm.ClientDateOfBirth != DateTime.MinValue)
+                if (!string.IsNullOrEmpty(uvm.ClientPhoneNum))
                 {
-                    client.ClientDateOfBirth = uvm.ClientDateOfBirth;
+                    client.ClientPhoneNum = uvm.ClientPhoneNum;
+                }
+                if (!string.IsNullOrEmpty(uvm.ClientPhysicalAddress))
+                {
+                    client.ClientPhysicalAddress = uvm.ClientPhysicalAddress;
+                }
+                if (!string.IsNullOrEmpty(uvm.ClientTitle))
+                {
+                    client.ClientTitle = uvm.ClientTitle;
                 }
 
                 // Update other client details if provided
@@ -114,6 +106,136 @@ namespace PedalProAPI.Controllers
                 _logger.LogError(ex, "An error occurred during user details update.");
 
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please contact support.");
+            }
+        }
+
+        [HttpPut]
+        [Route("DeactivateMyAccount")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> DeactivateMyAccount()
+        {
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var client = await _repository.GetClient(userId);
+
+            if (client == null)
+            {
+                return BadRequest("Client not found.");
+            }
+
+            var userClaims = User.Claims;
+            bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasClientRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+
+            if (user == null)
+                return NotFound();
+
+            client.IsActive = false;
+            await _repository.SaveChangesAsync();
+
+            var message = "Your account has been deactivated.";
+            var responseObject = new { Message = message };
+            /*
+            user.IsActive = false;
+            _dbContext.SaveChanges();*/
+
+            return Ok(responseObject);
+        }
+
+        [HttpPut]
+        [Route("UploadProfileImage")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> UploadProfileImage(IFormFile file)
+        {
+            try
+            {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var client = await _repository.GetClient(userId);
+
+                if (client == null)
+                {
+                    return BadRequest("Client not found.");
+                }
+
+                var userClaims = User.Claims;
+                bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasClientRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
+                client.ClientProfilePicture = null;
+                await _repository.SaveChangesAsync();
+
+                if (file != null && file.Length > 0)
+                {
+                    // Configure your Cloudinary account
+                    Account account = new Account(
+                        "dcpmharuk",
+                        "183493828529672",
+                        "869tkBTJoV1UmiO0ubhatZ5rNSs"
+                    );
+
+                    Cloudinary cloudinary = new Cloudinary(account);
+
+                    // Upload the image to Cloudinary
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(file.FileName, file.OpenReadStream())
+                    };
+
+                    var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                    var url = uploadResult.Url.AbsoluteUri;
+
+                    client.ClientProfilePicture = url;
+
+                    await _repository.SaveChangesAsync();
+
+                    return Ok(uploadResult);
+                }
+
+                return BadRequest("No image uploaded.");
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal Server Error. Please contact support.");
             }
         }
     }

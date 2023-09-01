@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PedalProAPI.Context;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using System.Security.Claims;
 
 namespace PedalProAPI.Controllers
 {
@@ -17,11 +19,13 @@ namespace PedalProAPI.Controllers
     {
         private readonly IRepository _repsository;
         private readonly PedalProDbContext _context;
+        private readonly UserManager<PedalProUser> _userManager;
 
-        public ScheduleController(IRepository repsository, PedalProDbContext context)
+        public ScheduleController(IRepository repsository, PedalProDbContext context, UserManager<PedalProUser> userManager)
         {
             _repsository = repsository;
             _context = context;
+            _userManager = userManager;
         }
         
         
@@ -63,9 +67,36 @@ namespace PedalProAPI.Controllers
 
         [HttpGet]
         [Route("GetTimeslotsthree/{date}")]
-        [Authorize(Roles = "Client,Employee")]
+        [Authorize(Roles = "Client,Employee,Admin")]
         public async Task<ActionResult<IEnumerable<Timeslot>>> GetTimeslotsthree(DateTime date)
         {
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole &&!hasClientRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
 
             var dateTwo = await _context.Dates.Where(s => s.Date1 == date).ToListAsync();
 
@@ -89,6 +120,33 @@ namespace PedalProAPI.Controllers
         [Route("AddTimeslot")]
         public async Task<IActionResult> AddTimeslot(DateWithTimeslotDto dateWithTimeslotDto)
         {
+
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
 
             var existingDate = await _context.Dates.FirstOrDefaultAsync(d => d.Date1 == dateWithTimeslotDto.date);
 
@@ -181,11 +239,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteTimeSlot/{timeslotId}")]
-        
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTimeSlot(int timeslotId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingWorkout = await _repsository.GetTimeslotAsync(timeslotId);
                 if (existingWorkout == null) return NotFound($"The tiemslots does not exist");
 
@@ -211,8 +296,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("UpdateTimeslot/{timeslotId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTimeslot(int timeslotId, DateWithTimeslotDto dateWithTimeslotDto)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var existingDate = await _context.Dates.FirstOrDefaultAsync(d => d.Date1 == dateWithTimeslotDto.date);
 
             Date date;
@@ -243,17 +356,16 @@ namespace PedalProAPI.Controllers
             _context.Entry(timeslot).State = EntityState.Modified;
             await _repsository.SaveChangesAsync();
 
-            var dateSlot = new DateSlot
-            {
-                Date = date,
-                Timeslot = timeslot
-            };
-            _context.DateSlots.Add(dateSlot);
+            var existingdateslot = await _context.DateSlots.FindAsync(timeslot.TimeslotId);
+
+            existingdateslot.TimeslotId = timeslot.TimeslotId;
+            existingdateslot.DateId = date.DateId;
+
             await _repsository.SaveChangesAsync();
 
             var schedule = new Schedule
             {
-                DateslotId = dateSlot.DateSlotId,
+                DateslotId = existingdateslot.DateSlotId,
                 EmployeeId = dateWithTimeslotDto.EmployeeId
             };
             _repsository.Add(schedule);

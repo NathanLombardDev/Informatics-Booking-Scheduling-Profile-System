@@ -70,6 +70,21 @@ import { ViewAvailPackagesComponent } from './ClientPackages/view-avail-packages
 import { ProvideFeedbackComponent } from './Feedback/provide-feedback/provide-feedback.component';
 import { ViewFeedbackComponent } from './Feedback/view-feedback/view-feedback.component';
 import { ViewCartComponent } from './Cart/view-cart/view-cart.component';
+import { SuccessCheckoutComponent } from './Cart/success-checkout/success-checkout.component';
+import { UnSuccessfullCheckoutComponent } from './Cart/un-successfull-checkout/un-successfull-checkout.component';
+import { WorkoutReportComponent } from './Reports/workout-report/workout-report.component';
+import { PackageReportComponent } from './Reports/package-report/package-report.component';
+import { PopularDaysReportComponent } from './Reports/popular-days-report/popular-days-report.component';
+import { SuccessBookingPaymentComponent } from './Bookings/success-booking-payment/success-booking-payment.component';
+import { UnsuccessBookingPaymentComponent } from './Bookings/unsuccess-booking-payment/unsuccess-booking-payment.component';
+import { RevenueReportComponent } from './Reports/revenue-report/revenue-report.component';
+import { PackageListReportComponent } from './Reports/package-list-report/package-list-report.component';
+import { ClientListReportComponent } from './Reports/client-list-report/client-list-report.component';
+import { StaffReportComponent } from './Reports/staff-report/staff-report.component';
+import { TestingTestingUploadComponent } from './testing-testing-upload/testing-testing-upload.component';
+import { ReactivateAccountComponent } from './ClientDetails/reactivate-account/reactivate-account.component';
+import { RestoreDatabaseComponent } from './Database/restore-database/restore-database.component';
+
 
 const routes: Routes = [
   {path:'login',component:LoginComponent},
@@ -243,7 +258,21 @@ const routes: Routes = [
    {path:'ViewAvailPackages',component:ViewAvailPackagesComponent},
    {path:'ProvideFeedback',component:ProvideFeedbackComponent},
    {path:'ViewFeedback',component:ViewFeedbackComponent},
-   {path:'ViewCart',component:ViewCartComponent}
+   {path:'ViewCart',component:ViewCartComponent},
+   {path:'SuccessfulPayment', component:SuccessCheckoutComponent},
+   {path:'UnSuccessfulPayment',component:UnSuccessfullCheckoutComponent},
+   {path:'WorkoutReport',component:WorkoutReportComponent},
+   {path:'PackageReport',component:PackageReportComponent},
+   {path:'PopularDaysReport',component:PopularDaysReportComponent},
+   {path:'SuccessfulBookingPayment', component:SuccessBookingPaymentComponent},
+   {path:'UnSuccessfulBookingPayment',component:UnsuccessBookingPaymentComponent},
+   {path:'RevenueReport',component:RevenueReportComponent},
+   {path:'PackageListReport',component:PackageListReportComponent},
+   {path:'ClientListReport',component:ClientListReportComponent},
+   {path:'StaffReport',component:StaffReportComponent},
+   {path:'testingpage',component:TestingTestingUploadComponent},
+   {path:'Reactivate',component:ReactivateAccountComponent},
+   {path:'RestoreDatabase',component:RestoreDatabaseComponent}
 ];
 
 @NgModule({

@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Help } from 'src/app/Models/help';
 import { HelpCatergory } from 'src/app/Models/help-catergory';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edit-help',
@@ -10,7 +12,7 @@ import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.servi
   styleUrls: ['./edit-help.component.css']
 })
 export class EditHelpComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService, private router:Router, private route:ActivatedRoute){
 
   }
 
@@ -36,6 +38,10 @@ export class EditHelpComponent implements OnInit{
           this.dataservice.GetHelp(id).subscribe({
             next:(response)=>{
               this.addHelps=response;
+            },
+            error:(err)=>{
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           })
 
@@ -54,12 +60,22 @@ export class EditHelpComponent implements OnInit{
       this.dataservice.UpdateHelp(this.addHelps.helpId,this.addHelps).subscribe({
         next:(response)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       })
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
   //redirect
   cancel_continue(){

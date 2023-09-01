@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,16 +7,19 @@ using PedalProAPI.Context;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CartController : ControllerBase
     {
-
         private readonly IRepository _repsository;
-
         private readonly UserManager<PedalProUser> _userManager;
         private readonly IRepository _repository;
         private readonly IUserClaimsPrincipalFactory<PedalProUser> _claimsPrincipalFactory;
@@ -35,81 +39,50 @@ namespace PedalProAPI.Controllers
             _logger = logger;
             _context = context;
         }
-        /*
-        [HttpPost]
-        [Route("AddPackageToCart")]
-        public async Task<IActionResult> AddPackageToCart(CartViewModel packageRequest)
-        {
-            var cart=_context.Carts.Include(c => c.Packages).FirstOrDefault(c => c.CartId == packageRequest.cartId);
-            
-            if (cart == null)
-            {
-                // Create a new cart if it doesn't exist
-                cart = new Cart();
-                _context.Carts.Add(cart);
-            }
-            
-            var package = _context.Packages.FirstOrDefault(p => p.PackageId == packageRequest.packageId);
-
-            if (package == null)
-            {
-                return NotFound("Package not found");
-            }
-
-            // Add the package to the cart
-            cart.Packages.Add(package);
-
-            var packageprice= await _repository.GetPackageAssocAsync(packageRequest.packageId);
-
-            var price =await _repository.GetPriceAsync((int)packageprice.PriceId);
-
-
-            // Update the cart amount based on the added package price
-            if (cart.CartAmount == null)
-            {
-                cart.CartAmount = price.Price1;
-            }
-            else
-            {
-                cart.CartAmount += price.Price1;
-            }
-
-            if (cart.CartQuantity==null)
-            {
-                cart.CartQuantity = 1;
-            }
-            else
-            {
-                cart.CartQuantity += 1;
-            }
-
-            _context.SaveChanges();
-
-
-            if (cart.CartQuantity < 1)
-            {
-                cart.CartStatusId = 1;
-            }
-            else
-            {
-                cart.CartStatusId = 2;
-            }
-            _context.SaveChanges();
-
-            return Ok(cart);
-
-        }
-        */
 
         [HttpPost]
         [Route("AddPackageToCart")]
+        [Authorize(Roles = "Client")]
         public async Task<IActionResult> AddPackageToCart(CartViewModel packageRequest)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            //bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasClientRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+            var client = await _repsository.GetClient(userId);
+
+            if (client == null)
+            {
+                return BadRequest("Client not found.");
+            }
+
             var cart = _context.Carts.Include(c => c.Packages).FirstOrDefault(c => c.CartId == packageRequest.cartId);
 
             if (cart == null)
             {
-                // Create a new cart if it doesn't exist
                 cart = new Cart();
                 _context.Carts.Add(cart);
             }
@@ -124,9 +97,16 @@ namespace PedalProAPI.Controllers
             var packageprice = await _repository.GetPackageAssocAsync(packageRequest.packageId);
             var price = await _repository.GetPriceAsync((int)packageprice.PriceId);
 
-            if (!cart.Packages.Contains(package)) // Check if package doesn't exist in cart
+            var clientPackageExists = _context.ClientPackages
+            .Any(cp => cp.ClientId == client.ClientId && cp.PackageId == packageRequest.packageId); 
+
+            if (clientPackageExists)
             {
-                // Add the package to the cart for the first time
+                return BadRequest("You have already bought this package.");
+            }
+
+            if (!cart.Packages.Contains(package))
+            {
                 cart.Packages.Add(package);
                 if (cart.CartAmount == null)
                 {
@@ -177,42 +157,72 @@ namespace PedalProAPI.Controllers
             }
         }
 
-        /*
-        [HttpPost("api/carts/{cartId}/packages")]
-        public IActionResult AddPackageToCart(int cartId, [FromBody] PackageRequest packageRequest)
+        [HttpDelete]
+        [Route("RemovePackageFromCart")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> RemovePackageFromCart(CartViewModel packageRequest)
         {
-            // Fetch the cart by cartId
-            var cart = _context.Carts.Include(c => c.Packages).FirstOrDefault(c => c.CartId == cartId);
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            //bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasClientRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+            var cart = _context.Carts.Include(c => c.Packages).FirstOrDefault(c => c.CartId == packageRequest.cartId);
 
             if (cart == null)
             {
-                return NotFound();
+                return NotFound("Cart not found");
             }
 
-            // Fetch the package by packageId
-            var package = _context.Packages.FirstOrDefault(p => p.PackageId == packageRequest.PackageId);
+            var package = cart.Packages.FirstOrDefault(p => p.PackageId == packageRequest.packageId);
 
             if (package == null)
             {
-                return NotFound();
+                return NotFound("Package not found in the cart");
             }
 
-            // Add the package to the cart
-            cart.Packages.Add(package);
+            var packageprice = await _repository.GetPackageAssocAsync(packageRequest.packageId);
+            var price = await _repository.GetPriceAsync((int)packageprice.PriceId);
 
-            // Update the cart amount based on the added package price
-            if (cart.CartAmount == null)
+            // Remove the package from the cart
+            cart.Packages.Remove(package);
+            cart.CartAmount -= price.Price1;
+            cart.CartQuantity--;
+
+            if (cart.CartQuantity < 1)
             {
-                cart.CartAmount = package.Price;
+                cart.CartStatusId = 1;
             }
             else
             {
-                cart.CartAmount += package.Price;
+                cart.CartStatusId = 2;
             }
 
             _context.SaveChanges();
 
-            return Ok();
-        }*/
+            return Ok(cart);
+        }
     }
 }

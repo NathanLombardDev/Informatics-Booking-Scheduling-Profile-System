@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 import { UserViewModel } from 'src/app/Models/user-view-model';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-register',
@@ -20,24 +23,45 @@ export class RegisterComponent {
     emailAddress:""
   }
   loading: boolean = false;
+  
 
-  constructor(private service: PedalProServiceService, private router:Router) { }
+  constructor(private dialog:MatDialog,private service: PedalProServiceService, private router:Router,private datePipe: DatePipe) {
+    
+   }
+
+   getCurrentDate(): string {
+    // Get the current date and format it as 'yyyy-MM-dd'
+    return new Date().toISOString().split('T')[0];
+  }
+
+  getTwoYearsAgo(): string {
+    const currentDate = new Date();
+    currentDate.setFullYear(currentDate.getFullYear() - 2);
+    
+    // Format the date as 'yyyy-MM-dd'
+    return currentDate.toISOString().split('T')[0];
+  }
 
   registerUser(): void {
     this.loading = true;
     this.service.registerUser(this.user).subscribe(
       (response) => {
-        // Registration successful, handle the response as needed
         console.log('Registration successful:', response);
-        // Optionally, you can navigate to a success page or show a success message
         this.loading = false;
-        this.router.navigate(['/login']); // Redirect to protected page
+        this.router.navigate(['/login']);
       },
       (error) => {
-        console.error('Registration failed:', error);
-        // Handle registration error (e.g., show an error message to the user)
         this.loading = false;
+        const errorMessage = error.error || 'An error occurred';
+
+        this.openErrorDialog(errorMessage); 
       }
     );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 }

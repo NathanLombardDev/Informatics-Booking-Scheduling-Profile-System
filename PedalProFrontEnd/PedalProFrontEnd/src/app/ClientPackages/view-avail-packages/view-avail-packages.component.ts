@@ -12,7 +12,7 @@ import { Price } from 'src/app/Models/price';
 import { MyDialogData } from 'src/app/Dialogs/add-cart-dialog/add-cart-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { AddCartDialogComponent } from 'src/app/Dialogs/add-cart-dialog/add-cart-dialog.component';
-
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 @Component({
   selector: 'app-view-avail-packages',
   templateUrl: './view-avail-packages.component.html',
@@ -28,7 +28,7 @@ export class ViewAvailPackagesComponent implements OnInit{
   packages:Package[]=[];
   prices:Price[]=[];
   searchTerm:string='';
-
+  clientDetails: any;
   cartnumber:any;
 
 
@@ -37,6 +37,25 @@ export class ViewAvailPackagesComponent implements OnInit{
     this.GetModules();
     const storedCartQuantity = localStorage.getItem('cartQuantity');
     this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   GetPackagePrices(){
@@ -126,6 +145,10 @@ export class ViewAvailPackagesComponent implements OnInit{
         }
         this.openModal();
         
+      },
+      error:(err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     })
   }
@@ -156,13 +179,11 @@ export class ViewAvailPackagesComponent implements OnInit{
             this.ReloadPage();
           },
           (error) => {
-            console.error('Error adding package to cart:', error);
-            // Handle error, show an error message, etc.
+            const errorMessage = error.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
           }
         );
       } else {
-        // User cancelled or closed the dialog
-        // Handle accordingly if needed
       }
     });
   }

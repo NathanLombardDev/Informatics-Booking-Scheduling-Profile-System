@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 import { WorkoutType } from 'src/app/Models/workout-type';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-workout-type',
@@ -9,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./add-workout-type.component.css']
 })
 export class AddWorkoutTypeComponent implements OnInit{
-  constructor(private dataService:PedalProServiceService,private router:Router) { }
+  constructor(private dialog:MatDialog,private dataService:PedalProServiceService,private router:Router) { }
 
   addClientTypes:WorkoutType={
     workoutTypeId:0,
@@ -37,10 +39,14 @@ export class AddWorkoutTypeComponent implements OnInit{
         next:(course)=>{
           this.openModal();
           //this.router.navigate(['pedalprorole'])
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }
@@ -51,5 +57,11 @@ export class AddWorkoutTypeComponent implements OnInit{
   Logout()
   {
     this.dataService.logout();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 }

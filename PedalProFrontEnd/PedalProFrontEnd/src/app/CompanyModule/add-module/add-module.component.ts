@@ -7,6 +7,8 @@ import { TrainingMaterial } from '../../Models/training-material';
 import { TrainingModule } from '../../Models/training-module';
 import { ModuleStatus } from '../../Models/module-status';
 import { Package } from '../../Models/package';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-module',
@@ -14,7 +16,7 @@ import { Package } from '../../Models/package';
   styleUrls: ['./add-module.component.css']
 })
 export class AddModuleComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService,private router:Router){
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService,private router:Router){
 
   }
   
@@ -38,21 +40,31 @@ export class AddModuleComponent implements OnInit{
 
   //add function
   addModule(){
-    if(this.addModules.trainingModuleName && this.addModules.trainingModuleDescription && this.addModules.PackageId && this.addModules.TrainingModuleStatusId)
+    if(this.addModules.trainingModuleName && this.addModules.trainingModuleDescription  && this.addModules.TrainingModuleStatusId)
     {
       this.dataservice.AddModule(this.addModules).subscribe({
         next:(course)=>{
           this.openModal();
+        },
+        error:(err)=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
     
   }
   //redirect
   cancel_continue(){
     this.router.navigate(['traingModuleCompany']);
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
   
   //modal pop-up

@@ -4,6 +4,8 @@ import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.servi
 import { Timeslot } from 'src/app/Models/timeslot';
 import { Router } from '@angular/router';
 import { TrainingModule } from 'src/app/Models/training-module';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-view-schedule',
@@ -23,13 +25,19 @@ export class ViewScheduleComponent implements OnInit{
 
   
 
-  constructor(private datePipe: DatePipe, private service: PedalProServiceService, private router: Router) {}
+  constructor(private dialog:MatDialog,private datePipe: DatePipe, private service: PedalProServiceService, private router: Router) {}
 
   public user = '';
 
   ngOnInit() {
     this.updateCalendar();
     this.GetModules();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   currentMonth: Date = new Date();
@@ -72,8 +80,9 @@ export class ViewScheduleComponent implements OnInit{
           (timeslots: Timeslot[]) => {
             day.timeslots = timeslots.sort((a, b) => this.compareTimes(a.startTime, b.startTime));
           },
-          (error) => {
-            // Handle error if necessary
+          (err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
           }
         );
       }
@@ -125,7 +134,7 @@ export class ViewScheduleComponent implements OnInit{
   onTimeslotClick(timeslot: Timeslot): void {
     this.clickedTimeslot = timeslot;
     //alert(`Clicked Timeslot ID: ${timeslot.timeslotId}`);
-    localStorage.setItem('User', JSON.stringify(this.user));
+    //localStorage.setItem('User', JSON.stringify(this.user));
   }
   
   

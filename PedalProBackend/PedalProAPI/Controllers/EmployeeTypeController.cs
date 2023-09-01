@@ -1,20 +1,29 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class EmployeeTypeController : ControllerBase
     {
         private readonly IRepository _repsository;
-        public EmployeeTypeController(IRepository repository)
+        private readonly UserManager<PedalProUser> _userManager;
+        public EmployeeTypeController(IRepository repository, UserManager<PedalProUser> userManager)
         {
 
             _repsository = repository;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -41,11 +50,38 @@ namespace PedalProAPI.Controllers
             }
         }
 
-
         [HttpPost]
         [Route("AddEmployeetypes")]
+        
         public async Task<IActionResult> AddRole(EmployeeTypeViewModel empTypeAdd)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var empType = new EmployeeType { EmpTypeName = empTypeAdd.EmpTypeName, EmpTypeDescription = empTypeAdd.EmpTypeDescription };
 
             try
@@ -64,10 +100,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditEmployeeType/{employeeTypeId}")]
+       
         public async Task<ActionResult<EmployeeTypeViewModel>> UpdateEmployeeType(int employeeTypeId, EmployeeTypeViewModel employeeTypeModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingType = await _repsository.GetEmployeeTypeAsync(employeeTypeId);
                 if (existingType == null) return NotFound("The Employee type does not exist");
 
@@ -88,10 +152,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteEmployeeType/{employeeTypeId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployeeType(int employeeTypeId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingType = await _repsository.GetEmployeeTypeAsync(employeeTypeId);
                 if (existingType == null) return NotFound($"The Employee type does not exist");
 

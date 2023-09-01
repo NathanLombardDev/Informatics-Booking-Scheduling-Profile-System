@@ -7,6 +7,8 @@ import { VideoLink } from 'src/app/Models/video-link';
 import { MaterialVid } from 'src/app/Models/material-vid';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TrainingModule } from 'src/app/Models/training-module';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-material-content',
@@ -19,12 +21,17 @@ export class MaterialContentComponent implements OnInit{
   moduleTwoTwo:TrainingModule[]=[];
   numbermodule:number=0;
   modules:TrainingModule[]=[];
+  clientDetails: any;
+  cartnumber:any;
+  moduleModuleName: string = ''; // Initialize with an empty string
+
 
   constructor(
     private route: ActivatedRoute,
     private service: PedalProServiceService,
     private router: Router,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private dialog:MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -38,20 +45,50 @@ export class MaterialContentComponent implements OnInit{
           this.service.getMaterialVids(materialId).subscribe({
             next: (response) => {
               this.materialMaterial = response;
-              this.fetchVideoUrls(); // Fetch video URLs after getting the materials
+              this.fetchVideoUrls();
             },
             error: (err) => {
-              console.error('Error fetching material:', err);
+              const errorMessage = err.error || 'An error occurred';
+              this.openErrorDialog(errorMessage);
             }
           });
         }
       },
       error: (err) => {
-        console.error('Error retrieving route parameter:', err);
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     });
 
-    this.GetModules();
+    if (this.modules.length === 0) {
+      this.GetModules();
+    }
+
+    if (this.numbermodule !== 0) {
+      this.GetModuleTwoTwo(this.numbermodule);
+    }
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+
+      }
+    );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   fetchVideoUrls(): void {
@@ -62,7 +99,8 @@ export class MaterialContentComponent implements OnInit{
           this.videoUrls[material.videoLinkId] = result.videoUrl;
         },
         (error) => {
-          console.error('Error fetching video URL:', error);
+          const errorMessage = error.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       );
     }
@@ -92,12 +130,22 @@ export class MaterialContentComponent implements OnInit{
     const modules = this.moduleTwoTwo.find(m => m.trainingModuleId === id);
   
     if (modules) {
-      return modules.trainingModuleName;
+      this.moduleModuleName = modules.trainingModuleName;
+      return this.moduleModuleName;
     } else {
-      this.service.GetModuleTwo(id).subscribe(result => {
-        this.moduleTwoTwo.push(result);
-        return result.trainingModuleName;
-      });
+      this.service.GetModuleTwo(id).subscribe(
+        result => {
+          this.moduleTwoTwo.push(result);
+          this.moduleModuleName = result.trainingModuleName;
+        },
+        error => {
+          const errorMessage = error.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
+          setTimeout(() => {
+            this.router.navigate(['/clientLanding']);
+          }, 4000); // Adjust the delay time as needed
+        }
+      );
     }
   
     // add a return statement here to handle the case where the module is not found

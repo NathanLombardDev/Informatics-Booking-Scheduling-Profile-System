@@ -1,5 +1,5 @@
 export interface Booking {
-    //bookingId:number;
+    bookingId:number;
     //bookingStatusId:number;
     //clientId:number;
     bookingTypeId:number;

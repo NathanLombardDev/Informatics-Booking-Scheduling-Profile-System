@@ -3,17 +3,25 @@ using Microsoft.AspNetCore.Mvc;
 using PedalProAPI.Models;
 using PedalProAPI.Repositories;
 using PedalProAPI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace PedalProAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ClientTypeController : ControllerBase
     {
         private readonly IRepository _repository;
-        public ClientTypeController(IRepository repository)
+        private readonly UserManager<PedalProUser> _userManager;
+        public ClientTypeController(IRepository repository, UserManager<PedalProUser> userManager)
         {
             _repository = repository;
+            _userManager = userManager;
         }
 
 
@@ -43,8 +51,36 @@ namespace PedalProAPI.Controllers
 
         [HttpPost]
         [Route("AddClientTypes")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddClientTypes(ClientTypeViewModel cvm)
         {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasAdminRole && !hasEmployeeRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
             var clientType = new ClientType { ClientTypeName = cvm.ClientTypeName };
 
             try
@@ -62,10 +98,38 @@ namespace PedalProAPI.Controllers
 
         [HttpPut]
         [Route("EditClientType/{clientTypeId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<ActionResult<ClientTypeViewModel>> EditClientType(int clientTypeId, ClientTypeViewModel clientModel)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingclientType = await _repository.GetClientTypeAsync(clientTypeId);
                 if (existingclientType == null) return NotFound($"The Client Type does not exist");
 
@@ -87,10 +151,38 @@ namespace PedalProAPI.Controllers
 
         [HttpDelete]
         [Route("DeleteClientType/{clientTypeId}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> DeleteClientType(int clientTypeId)
         {
             try
             {
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (string.IsNullOrEmpty(username))
+                {
+                    return BadRequest("Username not found.");
+                }
+
+                var user = await _userManager.FindByNameAsync(username);
+
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var userId = user.Id;
+
+                var userClaims = User.Claims;
+
+                bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+                bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+                //bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+                if (!hasAdminRole && !hasEmployeeRole)
+                {
+                    return Forbid("You do not have the necessary role to perform this action.");
+                }
+
                 var existingclientType = await _repository.GetClientTypeAsync(clientTypeId);
                 if (existingclientType == null) return NotFound($"The client type does not exist");
 

@@ -40,6 +40,12 @@ import { DateWithTimeslotDto } from '../Models/date-with-timeslot-dto';
 import { MaterialVid } from '../Models/material-vid';
 import { AddCart } from '../Models/add-cart';
 import { Cart } from '../Models/cart';
+import { AddBrandTest } from '../Models/add-brand-test';
+import { BrandImage } from '../Models/brand-image';
+import { BrandTwo } from '../Models/brand-two';
+import { Feedback } from '../Models/feedback';
+import { FeedbackCatergory } from '../Models/feedback-catergory';
+import { ComplexBooking } from '../Models/complex-booking';
 
 @Injectable({
   providedIn: 'root'
@@ -79,6 +85,7 @@ export class PedalProServiceService {
         localStorage.setItem('jwt', response.value.token);
         localStorage.setItem('cartQuantity', '0');
         localStorage.setItem('cartId', '0');
+        localStorage.setItem('bookingId', '0');
       })
     );
   }
@@ -95,8 +102,32 @@ export class PedalProServiceService {
     localStorage.removeItem('jwt');
     this.router.navigate(['/login']); // Redirect to the register page
     localStorage.setItem('cartId', '0');
+    localStorage.setItem('cartQuantity', '0');
+    localStorage.setItem('bookingId', '0');
+  }
+
+
+  getToken(): string | null {
+    return localStorage.getItem('jwt');
+  }
+
+  isTokenValid(token: string): boolean {
+    try {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      if (!tokenPayload.exp) {
+        return false; // No expiration, consider it invalid
+      }
+
+      const expirationTime = new Date(tokenPayload.exp * 1000); // Convert to milliseconds
+      const currentTime = new Date();
+
+      return currentTime < expirationTime;
+    } catch (error) {
+      return false; // Token is invalid or cannot be parsed
+    }
   }
   //Authentication ends
+
 
   GetRoles(): Observable<any>{
     return this.http.get(`${this.apiUrl}PedalProRole/GetAllRoles`)
@@ -390,6 +421,14 @@ export class PedalProServiceService {
     return this.http.get<BicycleBrand>(this.apiUrl+'BicycleBrand/GetBicycleBrand/'+id)
   }
 
+  GetBicycleBrandTwo(id:any):Observable<BrandTwo>{
+    return this.http.get<BrandTwo>(this.apiUrl+'BicycleBrand/GetBicycleBrand/'+id)
+  }
+
+  GetBicycleBrandImage(id:any):Observable<BrandImage>{
+    return this.http.get<BrandImage>(this.apiUrl+'BicycleBrand/GetBrandImage/'+id)
+  }
+
   GetBicycleBrands(): Observable<any>{
     return this.http.get(`${this.apiUrl}BicycleBrand/GetAllBicycleBrands`)
     .pipe(map(result => result))
@@ -397,6 +436,33 @@ export class PedalProServiceService {
 
   AddBicycleBrand(addbicyclebrand:BicycleBrand):Observable<BicycleBrand>{
     return this.http.post<BicycleBrand>(`${this.apiUrl}BicycleBrand/AddBicycleBrand`,addbicyclebrand);
+  }
+  /*
+  AddBicycleBrandTwo(brand: BicycleBrand, imageFile: FormData): Observable<BicycleBrand> {
+    const url = `${this.apiUrl}BicycleBrand/AddBicycleBrandTwo`;
+    return this.http.post<BicycleBrand>(url, imageFile, { params: { ...brand } });
+  }*/
+
+  uploadImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<any>(`${this.apiUrl}BicycleBrand/TestImageUpload`, formData);
+  }
+
+  uploadProfileImage(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.put<any>(`${this.apiUrl}AccountDetails/UploadProfileImage`, formData);
+  }
+
+  AddBicycleBrandTwo(brand: AddBrandTest, file: File): Observable<BicycleBrand> {
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('brandAdd', JSON.stringify(brand));
+
+    return this.http.post<BicycleBrand>(`${this.apiUrl}BicycleBrand/AddBicycleBrandThree`, formData);
   }
 
   DeleteBicycleBrand(id:any):Observable<BicycleBrand>{
@@ -537,9 +603,18 @@ export class PedalProServiceService {
     .pipe(map(result => result))
   }
 
+  GetClientsClientsbookings(): Observable<any>{
+    return this.http.get(`${this.apiUrl}PedalProUser/GetClientsWithBookings`)
+    .pipe(map(result => result))
+  }
+
  
   sendBookingReminder(clientId: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}PedalProUser/SendBookingReminder/${clientId}`, null);
+  }
+
+  sendBookingRemindertwo(clientId: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}PedalProUser/SendBookingReminderTwo/${clientId}`, null);
   }
 
 
@@ -577,18 +652,7 @@ export class PedalProServiceService {
     GetHelpCategory(id:any):Observable<HelpCatergory>{
       return this.http.get<HelpCatergory>(this.apiUrl+'Help/GetHelpCategory/'+id)
     }
-  
-    /*GetAllHelpCategories(): Observable<any>{
-      return this.http.get(`${this.apiUrl}Help/GetAllHelpCategories`)
-      .pipe(map(result => result))
-    }
 
-    
-
-    GetHelpCategory(id:any):Observable<Help>{
-      return this.http.get<Help>(this.apiUrl+'Help/GetHelpCategory/'+id)
-    }*/
-  
     //End of Categoriess
 
 
@@ -655,6 +719,48 @@ export class PedalProServiceService {
       });
     }
 
+    uploadImageIndemnity(formData: FormData) {
+      return this.http.post(`${this.apiUrl}IndemnityForm/UploadImage`, formData);
+    }
+
+    //Start of Feedback
+    GetAllFeedback(): Observable<any>{
+      return this.http.get(`${this.apiUrl}Feedback/GetAllFeedback`)
+      .pipe(map(result => result))
+    }
+  
+    GetFeedback(id:any):Observable<Feedback>{
+      return this.http.get<Feedback>(this.apiUrl+'Feedback/GetFeedback/'+id)
+    }
+  
+    ProvideFeedback(providefeedback:Feedback):Observable<Feedback>{
+      return this.http.post<Feedback>(`${this.apiUrl}Feedback/ProvideFeedback`,providefeedback);
+    }
+  
+     //Start of Feedback Categories
+    GetAllFeedbackCategories(): Observable<any>{
+      return this.http.get(`${this.apiUrl}Feedback/GetAllFeedbackCategories`)
+      .pipe(map(result => result))
+    }
+
+    GetFeedbackCategory(id:any):Observable<FeedbackCatergory>{
+      return this.http.get<FeedbackCatergory>(this.apiUrl+'Feedback/GetFeedbackCategory/'+id)
+    }
+
+     //End of Feedback
+
+
+     addBookingtwo(schedule: ComplexBooking): Observable<any> {
+      return this.http.post(`${this.apiUrl}Booking/AddBooking`, schedule);
+    }
+
+    
+    getLatestDocumenttwo(): Observable<ArrayBuffer> {
+      return this.http.get(`${this.apiUrl}IndemnityForm/GetLatestDocument`, {
+        responseType: 'arraybuffer',
+      });
+    }
+
     addTimeslot(dateWithTimeslotDto: DateWithTimeslotDto): Observable<any> {
       return this.http.post<any>(`${this.apiUrl}Schedule/AddTimeslot`, dateWithTimeslotDto);
     }
@@ -708,5 +814,97 @@ export class PedalProServiceService {
     const url = `${this.apiUrl}Checkout/initiate-payment?cartId=${cartId}`;
     return this.http.post<any>(url, {});
   }
+
+  savePayment(cartId: number): Observable<any> {
+    const url = `${this.apiUrl}Checkout/SavePayment?cartId=${cartId}`;
+    return this.http.post<any>(url, {});
+  }
+
+
+
+  getWorkoutReportData(timeInterval: string): Observable<any> {
+    const url = `${this.apiUrl}Report/generate?timeInterval=${timeInterval}`;
+    return this.http.get(url);
+  }
+
+  getPackageReportData(): Observable<any> {
+    const url = `${this.apiUrl}Report/GeneratePackageReport`;
+    return this.http.get(url);
+  }
+
+  getRevenueportData(): Observable<any> {
+    const url = `${this.apiUrl}Report/GenerateRevenueReport`;
+    return this.http.get(url);
+  }
+
+  getReportData(): Observable<any> {
+    const apiUrl = `${this.apiUrl}Report/GeneratePopularDaysReport`; 
+    return this.http.get(apiUrl);
+  }
+
+  getbookingcheckouturl(bookingtypeid: number): Observable<any> {
+    const url = `${this.apiUrl}Booking/GetBookingPaymentURL?bookingTypeid=${bookingtypeid}`;
+    return this.http.post<any>(url, {});
+  }
+
+  saveBookingPayment(bookingId: number): Observable<any> {
+    const url = `${this.apiUrl}Booking/SaveBookingPayment?bookingId=${bookingId}`;
+    return this.http.post<any>(url, {});
+  }
+
+  deleteBooking(bookingId:number):Observable<any>{
+    const url = `${this.apiUrl}Booking/DeleteBooking/${bookingId}`;
+    return this.http.delete(url);
+  }
+
+  cancelBooking(bookingId: number, reason: string): Observable<any> {
+    const url = `${this.apiUrl}Booking/CancelBooking/${bookingId}`;
+    return this.http.delete(url, { params: { reason } });
+  }
+
+  getclientlistReportData(): Observable<any> {
+    const apiUrl = `${this.apiUrl}Report/GenerateClientListReport`; 
+    return this.http.get(apiUrl);
+  }
+
+  getpackagelistReportData(): Observable<any> {
+    const apiUrl = `${this.apiUrl}Report/GeneratePackageListReport`; 
+    return this.http.get(apiUrl);
+  }
+
+  getstaffReportData(): Observable<any> {
+    const apiUrl = `${this.apiUrl}Report/GenerateStaffReport`; 
+    return this.http.get(apiUrl);
+  }
+
+  getDateandTimeslot(id:number): Observable<any> {
+    const apiUrl = `${this.apiUrl}Booking/GetDateandTimeBooking/`+id; 
+    return this.http.get(apiUrl);
+  }
+
+
+  removePackageFromCart(cartId: number, packageId: number): Observable<Cart> {
+    const url = `${this.apiUrl}Cart/RemovePackageFromCart`;
+    const requestPayload = {
+      cartId: cartId,
+      packageId: packageId
+    };
+
+    return this.http.delete<Cart>(url, { body: requestPayload });
+  }
+
+  deactivateAccount(): Observable<any> {
+    return this.http.put(`${this.apiUrl}AccountDetails/DeactivateMyAccount`, null);
+  }
+
+  reactivateAccount(emailAddress: string, password: string): Observable<any> {
+    const loginData = {
+      emailAddress: emailAddress,
+      password: password
+    };
+    return this.http.put(`${this.apiUrl}Authentication/ReactivateAccount`, loginData);
+  }
+
+  
 
 }

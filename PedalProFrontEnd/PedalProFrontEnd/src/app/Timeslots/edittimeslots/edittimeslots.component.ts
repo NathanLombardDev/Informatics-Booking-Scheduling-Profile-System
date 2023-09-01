@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 import { DateWithTimeslotDto } from 'src/app/Models/date-with-timeslot-dto';
+import { Employee } from 'src/app/Models/employee';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-edittimeslots',
@@ -19,10 +22,12 @@ export class EdittimeslotsComponent {
   };
   isNewTimeslot: boolean = false;
 
+  employees:Employee[]=[];
+
   constructor(
     private route: ActivatedRoute,
     private location: Location,
-    private service: PedalProServiceService
+    private service: PedalProServiceService,private dialog:MatDialog
   ) { }
 
   ngOnInit() {
@@ -30,6 +35,28 @@ export class EdittimeslotsComponent {
     if (!this.isNewTimeslot) {
       this.loadTimeslotDetails();
     }
+
+    this.GetModules();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
+  getCurrentDate(): Date {
+    return new Date(); // Returns the current date
+  }
+
+  GetModules(){
+    this.service.GetEmployeesTwo().subscribe(result=>{
+      let moduleList:any[]=result
+      moduleList.forEach((element)=>{
+        this.employees.push(element)
+      });
+    })
+    return this.employees;
   }
 
   loadTimeslotDetails() {
@@ -50,16 +77,18 @@ export class EdittimeslotsComponent {
         .subscribe(response => {
           console.log('Timeslot created successfully:', response);
           this.goBack();
-        }, error => {
-          console.error('Error creating timeslot:', error);
+        }, err=>{
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         });
     } else {
       this.service.updateTimeslot(this.dateWithTimeslotDto.timeslotId, this.dateWithTimeslotDto)
         .subscribe(response => {
           console.log('Timeslot updated successfully:', response);
           this.goBack();
-        }, error => {
-          console.error('Error updating timeslot:', error);
+        }, error=>{
+          const errorMessage = error.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         });
     }
   }

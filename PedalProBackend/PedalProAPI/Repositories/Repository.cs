@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Api;
+using Microsoft.EntityFrameworkCore;
 using PedalProAPI.Context;
 using PedalProAPI.Models;
 
@@ -36,6 +37,7 @@ namespace PedalProAPI.Repositories
 
 
         //PedalProRole
+        /*
         public async Task<PedalProRole[]> GetAllRoleAsync()
         {
             IQueryable<PedalProRole> query = _pedalProDbContext.PedalProRoles;
@@ -46,10 +48,19 @@ namespace PedalProAPI.Repositories
             IQueryable<PedalProRole> query = _pedalProDbContext.PedalProRoles.Where(c => c.RoleId == roleId);
             return await query.FirstOrDefaultAsync();
         }
+        */
+
+        public async Task<ClientPackage[]> GetClientPackagesAsync(int clientId)
+        {
+            IQueryable<ClientPackage> query = _pedalProDbContext.ClientPackages.Where(c => c.ClientId == clientId);
+            return await query.ToArrayAsync();
+        }
+
+ 
 
 
         //Booking type
-        
+
         public async Task<BookingType[]> GetBookingTypes()
         {
             IQueryable<BookingType> query = _pedalProDbContext.BookingTypes;
@@ -67,6 +78,12 @@ namespace PedalProAPI.Repositories
         public async Task<EmployeeType> GetEmployeeTypeAsync(int employeeTypeId)
         {
             IQueryable<EmployeeType> query = _pedalProDbContext.EmployeeTypes.Where(c => c.EmpTypeId == employeeTypeId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<BrandImage> GetbrandImageAsync(int brandImageId)
+        {
+            IQueryable<BrandImage> query = _pedalProDbContext.BrandImages.Where(c => c.BrandImageId == brandImageId);
             return await query.FirstOrDefaultAsync();
         }
 
@@ -99,7 +116,7 @@ namespace PedalProAPI.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-
+        
 
         //Employee Status
         public async Task<EmployeeStatus[]> GetAllEmployeeStatusAsync()
@@ -219,6 +236,13 @@ namespace PedalProAPI.Repositories
         {
 
             IQueryable<PackagePrice> query = _pedalProDbContext.PackagePrices;
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<Price[]> GetPrices()
+        {
+
+            IQueryable<Price> query = _pedalProDbContext.Prices;
             return await query.ToArrayAsync();
         }
 
@@ -369,6 +393,18 @@ namespace PedalProAPI.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<Employee> GetEmployee(string userId)
+        {
+            IQueryable<Employee> query = _pedalProDbContext.Employees.Where(c => c.UserId == userId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<Administrator> GetAdmin(string userId)
+        {
+            IQueryable<Administrator> query = _pedalProDbContext.Administrators.Where(c => c.UserId == userId);
+            return await query.FirstOrDefaultAsync();
+        }
+
         //ScheduleGet
         public async Task<Schedule> GetSchedule(int scheduleId)
         {
@@ -389,11 +425,38 @@ namespace PedalProAPI.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
+        public async Task<Schedule> GetScheduleThird(int ScheduleId)
+        {
+            IQueryable<Schedule> query = _pedalProDbContext.Schedules.Where(c => c.ScheduleId == ScheduleId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+
+
 
         //BookingType
         public async Task<BookingType> GetBookingTypetwo(int bookingTypeId)
         {
             IQueryable<BookingType> query = _pedalProDbContext.BookingTypes.Where(c => c.BookingTypeId == bookingTypeId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        //Setup
+        public async Task<Setup> GetSetup(int setupId)
+        {
+            IQueryable<Setup> query = _pedalProDbContext.Setups.Where(c => c.SetupId == setupId);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<Models.Service> GetService(int serviceid)
+        {
+            IQueryable<Models.Service> query = _pedalProDbContext.Services.Where(c => c.ServiceId == serviceid);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<TrainingSession> GettrainingSession(int sessionId)
+        {
+            IQueryable<TrainingSession> query = _pedalProDbContext.TrainingSessions.Where(c => c.TrainingSessionId == sessionId);
             return await query.FirstOrDefaultAsync();
         }
 
@@ -575,6 +638,64 @@ namespace PedalProAPI.Repositories
                 .Include(c => c.Packages) // Include related packages
                 .Where(c => c.CartId == cartId);
 
+            return await query.FirstOrDefaultAsync();
+        }
+
+
+        public async Task<List<Workout>> GetWorkoutDataBetweenDates(DateTime startDate, DateTime endDate, int clientId)
+        {
+            return await _pedalProDbContext.Workouts
+                .Where(workout => workout.WorkoutDate >= startDate && workout.WorkoutDate <= endDate && workout.ClientId == clientId)
+                .ToListAsync();
+        }
+
+        public async Task<Checkout[]> GetAllCheckouts()
+        {
+            IQueryable<Checkout> query = _pedalProDbContext.Checkouts;
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<PackageRevenue> GetPackageRevenue(string name)
+        {
+            IQueryable<PackageRevenue> query = _pedalProDbContext.PackageRevenues.Where(c => c.PackageName == name);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<PackageRevenue[]> GetAllPackageRevenuesAsync()
+        {
+            IQueryable<PackageRevenue> query = _pedalProDbContext.PackageRevenues;
+            return await query.ToArrayAsync();
+        }
+
+
+        public async Task<BookingRevenue> GetBookingRevenue(string name)
+        {
+            IQueryable<BookingRevenue> query = _pedalProDbContext.BookingRevenues.Where(c => c.BookingType == name);
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<Package> GetPackageName(string name)
+        {
+            IQueryable<Package> query = _pedalProDbContext.Packages.Where(c => c.PackageName == name);
+            return await query.FirstOrDefaultAsync();
+        }
+
+
+        public async Task<Schedule[]> GetAllSchedulesAsync()
+        {
+            IQueryable<Schedule> query = _pedalProDbContext.Schedules;
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<BookingRevenue[]> GetAllBookingrevenue()
+        {
+            IQueryable<BookingRevenue> query = _pedalProDbContext.BookingRevenues;
+            return await query.ToArrayAsync();
+        }
+
+        public async Task<BookingType> GetBookingTypeName(string name)
+        {
+            IQueryable<BookingType> query = _pedalProDbContext.BookingTypes.Where(c => c.BookingTypeName == name);
             return await query.FirstOrDefaultAsync();
         }
 

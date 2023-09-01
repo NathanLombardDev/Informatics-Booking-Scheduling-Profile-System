@@ -30,6 +30,8 @@
             <li><a class="nav-link active" aria-current="page" routerLink="/calendar" >Make Booking</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="nav-link active" aria-current="page" routerLink="/ViewClientBookings">View bookings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ProvideFeedback" >Provide feedback</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -45,12 +47,15 @@
             Training Modules
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <div *ngFor="let module of modules; let last=last">
-              <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]" >{{module.trainingModuleName}}</a></li>
-              <li *ngIf="!last"><hr class="dropdown-divider"></li>
-            </div>
-            
-            
+            <ng-container *ngIf="modules.length > 0; else noModules">
+              <div *ngFor="let module of modules; let last=last">
+                <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]">{{module.trainingModuleName}}</a></li>
+                <li *ngIf="!last"><hr class="dropdown-divider"></li>
+              </div>
+            </ng-container>
+            <ng-template #noModules>
+              <div class="dropdown-item">No available modules</div>
+            </ng-template>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -87,10 +92,17 @@
       <button mat-menu-item routerLink="/ViewAccount">View Account Details</button>
       <button mat-menu-item routerLink="/PrintViewIF">View/Print Indemnity Form</button>
       <button mat-menu-item routerLink="/ClientUploadIF">Upload indemnity form</button>
+      <button mat-menu-item routerLink="/WorkoutReport">Workout stats report</button>
     </mat-menu>
     
     <div class="circular-button" [matMenuTriggerFor]="accountMenu" aria-label="View Account">
-      <img src="assets/nature.jpg" alt="Image">
+      <div *ngIf="clientDetails.clientProfilePicture; else fallbackImage">
+        <img src="{{ clientDetails?.clientProfilePicture }}" alt="Profile">
+      </div>
+      
+      <ng-template #fallbackImage>
+        <img src="assets/profile.jpg" alt="Image">
+      </ng-template>
     </div>
     
     <a class="navbar-brand" href="#"></a>
@@ -108,7 +120,7 @@
 
 
 <div class="cart-container">
-  <div *ngIf="cart" class="cart-content">
+  <div *ngIf="cart; else emptyCart" class="cart-content">
     <h2>Your Current Cart</h2>
     <br/>
     <div class="cart-summary">
@@ -126,8 +138,8 @@
     <div class="cart-items">
       <h3>Items in Cart:</h3>
       <br/>
-      <ul>
-        <li *ngFor="let package of cart.packages" class="cart-item">
+      <ul *ngIf="cart.packages.length>0;else emptyCart">
+        <li *ngFor="let package of cart.packages;else emptyCart" class="cart-item">
           <div class="item-details">
             <div class="package-info">
               <p>Package: {{ this.GetPackageName(package.packageId) }}</p>
@@ -137,7 +149,9 @@
             </div>
             <!-- Add package image, price, and other details here -->
           </div>
-          <button class="remove-btn" (click)="removeFromCart(package.packageId)">Remove</button>
+          <button mat-icon-button (click)="onRemovePackage(package.packageId)">
+            <mat-icon>delete</mat-icon>
+          </button>
         </li>
       </ul>
     </div>
@@ -146,6 +160,20 @@
   </div>
   
   <ng-template #emptyCart>
-    <p>Your cart is empty.</p>
+    <div class="alert">Your cart is empty.</div>
   </ng-template>
+  
+</div>
+
+<div class="modal" id="myModal" style="display: none;" >
+  <div class="modal-dialog" id="Dialog">
+    <div class="modal-content" id="Content">
+      
+      <div class="modal-body" id="modalBody">
+        <h4>Packaged removed from cart!</h4>
+        <br/>
+        <button type="button" class="btn btn-danger"  (click)="ReloadPage()"id="continue">Confirm</button>
+      </div>
+    </div>
+  </div>
 </div>

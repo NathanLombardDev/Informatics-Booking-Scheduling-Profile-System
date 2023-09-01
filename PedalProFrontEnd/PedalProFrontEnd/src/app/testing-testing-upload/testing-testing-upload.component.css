@@ -1,0 +1,88 @@
+mat-card {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+  
+  button {
+    margin: 10px;
+    background-color: black;
+    color: green;
+  }
+
+  #choose{
+    background-color: black;
+    color: green;
+  }
+
+  .container {
+    text-align: center; /* Center the content horizontally */
+    max-width: 400px;
+    margin: 20px auto; /* Center the container itself */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 0 rgb(41, 167, 2);
+    padding: 20px; /* Add padding for better spacing */
+    position: relative; /* Set the container as relative for absolute positioning */
+  }
+
+  #submit{
+    background-color: black;
+    color: #199709;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.6s ease-in-out;
+    border-radius: 30px;
+  }
+  #submit:hover{
+    background-color: white;
+    color: #199709;
+    border:black solid 1px;
+  }
+
+  .file-input-label {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid black;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.6s ease-in-out;
+  }
+  
+  .file-input-label:hover {
+    background-color: #000000;
+    color: white;
+  }
+  
+  h2 {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  #back{
+    text-align: left;
+    
+}
+  
+  mat-icon:hover {
+    cursor: pointer;
+    
+  }
+  .wholecontainer{
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 0 20px 0 rgb(41, 167, 2);
+  }

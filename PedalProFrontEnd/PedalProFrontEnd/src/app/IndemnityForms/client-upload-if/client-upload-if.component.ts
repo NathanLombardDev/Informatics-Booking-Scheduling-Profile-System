@@ -2,6 +2,8 @@ import { Component ,OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 import { TrainingModule } from 'src/app/Models/training-module';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-client-upload-if',
@@ -9,24 +11,47 @@ import { TrainingModule } from 'src/app/Models/training-module';
   styleUrls: ['./client-upload-if.component.css']
 })
 export class ClientUploadIFComponent implements OnInit{
-selectedFile: File | null = null;
+  selectedFile: File | null = null;
+  selectedFileTwo: File | null = null;
   title: string = '';
-
+  clientDetails: any;
+  cartnumber:any;
   modules:TrainingModule[]=[];
 
-  constructor(private documentUploadService: PedalProServiceService, private router:Router) {}
+  constructor(private dialog:MatDialog,private documentUploadService: PedalProServiceService, private router:Router) {}
 
   ngOnInit(): void {
     this.GetModules();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0] as File;
   }
 
+  fetchClientDetails() {
+    this.documentUploadService.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   onUpload() {
     if (!this.selectedFile || !this.title) {
-      alert('Please select a file and provide a title.');
+      this.openErrorDialog('Please select a file and provide a title.');
       return;
     }
 
@@ -36,9 +61,9 @@ selectedFile: File | null = null;
         // You can perform any action here after a successful upload
         this.router.navigate(['/clientLanding'])
       },
-      (error) => {
-        console.error('Error uploading the document:', error);
-        // Handle the error here
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     );
   }
@@ -57,5 +82,29 @@ selectedFile: File | null = null;
       });
     })
     return this.modules;
+  }
+
+  onFileSelectedtwo(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  onUploadtwo() {
+    if (!this.selectedFile) {
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.documentUploadService.uploadImageIndemnity(formData).subscribe(
+      (response) => {
+        console.log(response); // Handle the response from the API
+        this.router.navigate(['/clientLanding'])
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
   }
 }

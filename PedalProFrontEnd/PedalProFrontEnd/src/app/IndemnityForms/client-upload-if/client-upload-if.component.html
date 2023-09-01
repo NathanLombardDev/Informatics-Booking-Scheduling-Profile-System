@@ -30,6 +30,8 @@
             <li><a class="nav-link active" aria-current="page" routerLink="/calendar" >Make Booking</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="nav-link active" aria-current="page" routerLink="/ViewClientBookings">View bookings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ProvideFeedback" >Provide feedback</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -45,12 +47,15 @@
             Training Modules
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <div *ngFor="let module of modules; let last=last">
-              <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]" >{{module.trainingModuleName}}</a></li>
-              <li *ngIf="!last"><hr class="dropdown-divider"></li>
-            </div>
-            
-            
+            <ng-container *ngIf="modules.length > 0; else noModules">
+              <div *ngFor="let module of modules; let last=last">
+                <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]">{{module.trainingModuleName}}</a></li>
+                <li *ngIf="!last"><hr class="dropdown-divider"></li>
+              </div>
+            </ng-container>
+            <ng-template #noModules>
+              <div class="dropdown-item">No available modules</div>
+            </ng-template>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -77,6 +82,9 @@
       </ul>
     </div>
     
+    <small>{{cartnumber}}</small>
+    <mat-icon routerLink="/ViewCart">shopping_cart</mat-icon>
+    <a class="navbar-brand" href="#"></a>
     <mat-icon routerLink="/view-help">help_outline</mat-icon>
     <a class="navbar-brand" href="#"></a>
     <a class="navbar-brand" href="#"></a>
@@ -84,10 +92,17 @@
       <button mat-menu-item routerLink="/ViewAccount">View Account Details</button>
       <button mat-menu-item routerLink="/PrintViewIF">View/Print Indemnity Form</button>
       <button mat-menu-item routerLink="/ClientUploadIF">Upload indemnity form</button>
+      <button mat-menu-item routerLink="/WorkoutReport">Workout stats report</button>
     </mat-menu>
     
     <div class="circular-button" [matMenuTriggerFor]="accountMenu" aria-label="View Account">
-      <img src="assets/nature.jpg" alt="Image">
+      <div *ngIf="clientDetails.clientProfilePicture; else fallbackImage">
+        <img src="{{ clientDetails?.clientProfilePicture }}" alt="Profile">
+      </div>
+      
+      <ng-template #fallbackImage>
+        <img src="assets/profile.jpg" alt="Image">
+      </ng-template>
     </div>
     
     <a class="navbar-brand" href="#"></a>
@@ -98,6 +113,9 @@
 </nav>
 <br />
 <div class="container" id="container">
+  <h1>Indemnity Form</h1>
+
+
     <h2>Upload your indemnity form PDF</h2>
     <label for="fileInput" class="file-input-label">Choose File</label>
     <input type="file" id="fileInput" (change)="onFileSelected($event)" />
@@ -106,5 +124,23 @@
     <input type="text" [(ngModel)]="title" placeholder="Title" />
     <br />
     <br />
-    <button class="upload-button" (click)="onUpload()">Upload</button>
+    <button id="submit" class="upload-button" (click)="onUpload()">Upload</button>
+ 
+    <br/>
+    <br/>
+    <br/>
+    <h2>OR</h2>
+    <br/>
+  
+    <h2>Upload your indemnity form image</h2>
+    <label for="fileInput" class="file-input-label">Choose File</label>
+    <input type="file" (change)="onFileSelectedtwo($event)" accept="image/*">
+    <br />
+    <br />
+    <button id="submit" class="upload-button" (click)="onUploadtwo()">Upload Image</button>
   </div>
+
+
+
+
+  

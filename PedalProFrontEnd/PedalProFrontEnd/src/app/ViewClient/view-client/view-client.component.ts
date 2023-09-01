@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, Observable, Subject } from 'rxjs';
 import { ClientType } from 'src/app/Models/client-type';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-view-client',
@@ -14,7 +16,7 @@ import { ClientType } from 'src/app/Models/client-type';
 export class ViewClientComponent {
   clients:ClientClient[]=[];
   clientTypes:ClientType[]=[];
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){
     
   }
 
@@ -31,9 +33,15 @@ export class ViewClientComponent {
     
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   GetClients()
   {
-    this.service.GetClientsClients().subscribe(result=>{
+    this.service.GetClientsClientsbookings().subscribe(result=>{
       let roleList:any[]=result
       roleList.forEach((element)=>{
         this.clients.push(element)
@@ -82,17 +90,18 @@ export class ViewClientComponent {
   }
 
   sendReminder(clientId: number): void {
-    this.service.sendBookingReminder(clientId).subscribe(
+    this.service.sendBookingRemindertwo(clientId).subscribe(
       (response) => {
         // Success handling, display the response message in the modal
-        console.log('Booking reminder sent successfully');
-        this.openModal();
+        //console.log('Booking reminder sent successfully');
+        
       },
-      (error) => {
-        // Error handling, display the error message in the console
-        console.error('Failed to send booking reminder', error);
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
       }
     );
+    this.openModal();
   }
   Logout()
   {

@@ -49,6 +49,15 @@ namespace PedalProAPI.Models
 
         [Unicode(false)]
         public string? ClientProfilePicture { get; set; }
+        
+        
+        [StringLength(10)]
+        [Unicode(false)]
+        public bool IsActive { get; set; }
+
+        [StringLength(10)]
+        [Unicode(false)]
+        public int? NumBookingsAllowance { get; set; }
 
         /*
         [InverseProperty("Client")]

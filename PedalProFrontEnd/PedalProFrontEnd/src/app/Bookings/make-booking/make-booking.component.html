@@ -30,6 +30,8 @@
             <li><a class="nav-link active" aria-current="page" routerLink="/calendar" >Make Booking</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="nav-link active" aria-current="page" routerLink="/ViewClientBookings">View bookings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ProvideFeedback" >Provide feedback</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -45,12 +47,15 @@
             Training Modules
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <div *ngFor="let module of modules; let last=last">
-              <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]" >{{module.trainingModuleName}}</a></li>
-              <li *ngIf="!last"><hr class="dropdown-divider"></li>
-            </div>
-            
-            
+            <ng-container *ngIf="modules.length > 0; else noModules">
+              <div *ngFor="let module of modules; let last=last">
+                <li><a class="nav-link active" aria-current="page" [routerLink]="['/MaterialContent','edit',module.trainingModuleId]">{{module.trainingModuleName}}</a></li>
+                <li *ngIf="!last"><hr class="dropdown-divider"></li>
+              </div>
+            </ng-container>
+            <ng-template #noModules>
+              <div class="dropdown-item">No available modules</div>
+            </ng-template>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -77,6 +82,9 @@
       </ul>
     </div>
     
+    <small>{{cartnumber}}</small>
+    <mat-icon routerLink="/ViewCart">shopping_cart</mat-icon>
+    <a class="navbar-brand" href="#"></a>
     <mat-icon routerLink="/view-help">help_outline</mat-icon>
     <a class="navbar-brand" href="#"></a>
     <a class="navbar-brand" href="#"></a>
@@ -84,10 +92,17 @@
       <button mat-menu-item routerLink="/ViewAccount">View Account Details</button>
       <button mat-menu-item routerLink="/PrintViewIF">View/Print Indemnity Form</button>
       <button mat-menu-item routerLink="/ClientUploadIF">Upload indemnity form</button>
+      <button mat-menu-item routerLink="/WorkoutReport">Workout stats report</button>
     </mat-menu>
     
     <div class="circular-button" [matMenuTriggerFor]="accountMenu" aria-label="View Account">
-      <img src="assets/nature.jpg" alt="Image">
+      <div *ngIf="clientDetails.clientProfilePicture; else fallbackImage">
+        <img src="{{ clientDetails?.clientProfilePicture }}" alt="Profile">
+      </div>
+      
+      <ng-template #fallbackImage>
+        <img src="assets/profile.jpg" alt="Image">
+      </ng-template>
     </div>
     
     <a class="navbar-brand" href="#"></a>
@@ -96,20 +111,23 @@
   </div>
   
 </nav>
-
+<br/>
+<br/>
+<br/>
 <div class="row">
     <div class="col-5">
       
       
     </div>
     <div class="col-6">
+      <div class="wholecontainer">
       <br/>
       <h2>Booking details</h2>
       <br/>
-      <form #form="ngForm" (ngSubmit)="makeBooking()">
+      <form #form="ngForm" (ngSubmit)="addBookingtwo()">
         <div class="mb-3">
           <label for="empType" class="form-label" style="font-size: 16px;">Booking Type:</label>
-          <select class="form-select" id="empType" name="empType" [(ngModel)]="addBooking.bookingTypeId" #empType="ngModel" required>
+          <select class="form-select" id="empType" name="empType" [(ngModel)]="schedule.bookingTypeId" #empType="ngModel" required>
             <option value="">Select a booking type</option>
             <option *ngFor="let type of BookingTypes" [value]="type.bookingTypeId">{{ type.bookingTypeName }}</option>
           </select>
@@ -117,13 +135,51 @@
         <div *ngIf="empType.invalid && (empType.dirty || empType.touched)"
             class="alert" id="alert">
             <small *ngIf="empType.errors?.['required']">
-              <span>*Employee type is required!</span>
+              <span>*Booking type is required!</span>
             </small>
         </div>
+        <div class="mb-3">
+          <label for="biycle" class="form-label" style="font-size: 16px;">Bicycle:</label>
+          <select class="form-select" id="biycle" name="biycle" [(ngModel)]="schedule.bicycleId" #biycle="ngModel" required>
+            <option value="">Select a biycle</option>
+            <option *ngFor="let type of bicycles" [value]="type.bicycleId">{{ type.bicycleName }}</option>
+          </select>
+        </div>
+        <div *ngIf="biycle.invalid && (biycle.dirty || biycle.touched)"
+            class="alert" id="alert">
+            <small *ngIf="biycle.errors?.['required']">
+              <span>*Bicycle is required!</span>
+            </small>
+        </div>
+        <div class="mb-3">
+          <label for="Part" class="form-label" style="font-size: 16px;">Bicycle Part(only for service):</label>
+          <select class="form-select" id="biycle" name="Part" [(ngModel)]="schedule.bicyclePartId" #Part="ngModel" required>
+            <option value="">Select a biycle part</option>
+            <option *ngFor="let type of bicycleParts" [value]="type.bicyclePartId">{{ type.bicyclePartName }}</option>
+          </select>
+        </div>
+        <div *ngIf="Part.invalid && (Part.dirty || Part.touched)"
+            class="alert" id="alert">
+            <small *ngIf="Part.errors?.['required']">
+              <span>*Bicycle Part is required!</span>
+            </small>
+        </div>
+
+        <div class="mb-3">
+          <label for="name" class="form-label" style="font-size: 16px;">Description of booking:</label>
+          <input type="text" class="form-control" id="Description" name="Description" [(ngModel)]="schedule.description" #Description="ngModel" forbiddenName="client" required>
+        </div>
+        <div *ngIf="Description.invalid && (Description.dirty || Description.touched)"
+            class="alert" id="alert">
+            <div *ngIf="Description.errors?.['required']">
+              <span>*Description is required!</span>
+            </div>
+        </div>
         
-        <button type="submit" class="btn btn-success" style="margin-right: 6px;">Submit</button>
-        <button type="button" class="btn btn-danger" (click)="cancel_continue()">Cancel</button>
+        <button type="submit" class="btn btn-success" id="submit" style="margin-right: 6px;">Submit</button>
+        <button type="button" class="btn btn-danger" id="cancel" (click)="cancel_continue()">Cancel</button>
       </form>
+      </div>
     </div>
 
     <div class="col-1">

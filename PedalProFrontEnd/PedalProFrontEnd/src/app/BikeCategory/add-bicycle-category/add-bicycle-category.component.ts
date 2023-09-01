@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { BicycleCategory } from '../../Models/bicycle-category';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-bicycle-category',
@@ -9,7 +11,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./add-bicycle-category.component.css']
 })
 export class AddBicycleCategoryComponent {
-  constructor(private dataService:PedalProServiceService,private router:Router) { }
+  constructor(private dialog:MatDialog,private dataService:PedalProServiceService,private router:Router) { }
 
   addBicycleCat:BicycleCategory={
     bicycleCategoryId:0,
@@ -19,6 +21,8 @@ export class AddBicycleCategoryComponent {
   ngOnInit(): void {
     
   }
+
+  
   openModal()
   {
     const modelDiv=document.getElementById('myModal');
@@ -36,11 +40,21 @@ export class AddBicycleCategoryComponent {
         next:(course)=>{
           this.openModal();
           //this.router.navigate(['pedalprorole'])
+        },
+        error:(err)=> {
+          const errorMessage = err.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
         }
       });
     }else{
-      alert('Validation error: Please fill in all fields.');
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
   cancel_continue(){
     this.router.navigate(['BicycleCategory']);

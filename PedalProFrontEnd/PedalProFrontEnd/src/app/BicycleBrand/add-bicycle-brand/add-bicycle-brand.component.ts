@@ -5,6 +5,9 @@ import { VideoType } from '../../Models/video-type';
 import { PedalProServiceService } from '../../Services/pedal-pro-service.service';
 import { ImageType } from '../../Models/image-type';
 import { BicycleBrand } from '../../Models/bicycle-brand';
+import { AddBrandTest } from 'src/app/Models/add-brand-test';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 @Component({
   selector: 'app-add-bicycle-brand',
@@ -12,7 +15,7 @@ import { BicycleBrand } from '../../Models/bicycle-brand';
   styleUrls: ['./add-bicycle-brand.component.css']
 })
 export class AddBicycleBrandComponent implements OnInit{
-  constructor(private dataservice:PedalProServiceService,private router:Router){}
+  constructor(private dialog:MatDialog,private dataservice:PedalProServiceService,private router:Router){}
   
   //Components
   addBrands:BicycleBrand={
@@ -23,25 +26,57 @@ export class AddBicycleBrandComponent implements OnInit{
     brandImgName:''
   }
 
+  selectedFile: File | null = null;
+
   imageTypes:ImageType[]=[];
   
   ngOnInit(): void {
     this.GetImageTypes();
   }
 
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
+  }
+
   //Add brand to the database
-  addBrand(){
-    if(this.addBrands.brandImgName && this.addBrands.brandName && this.addBrands.imageTypeId && this.addBrands.imageUrl)
-    {
+  uploadAndAdd(): void {
+    if (this.selectedFile) {
+      this.dataservice.uploadImage(this.selectedFile).subscribe(
+        (response) => {
+          console.log('Image uploaded successfully:', response);
+          console.log(response.url)
+          this.addBrands.imageUrl=response.url;
+          this.addBrand();
+        },
+        (error) => {
+          const errorMessage = error.error || 'An error occurred';
+          this.openErrorDialog(errorMessage);
+        }
+      );
+    } else {
+      console.log('No image selected.');
+    }
+  }
+  
+  addBrand(): void {
+    if (this.addBrands.brandImgName && this.addBrands.brandName && this.addBrands.imageTypeId && this.addBrands.imageUrl) {
       this.dataservice.AddBicycleBrand(this.addBrands).subscribe({
-        next:(course)=>{
+        next: (brand) => {
           this.openModal();
+        },
+        error: (error) => {
+          console.error('Error adding brand:', error);
         }
       });
+    } else {
+      this.openErrorDialog('Validation error: Please fill in all fields.');
     }
-    else {
-      alert('Validation error: Please fill in all fields.');
-    }
+  }
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
   }
 
   //Cancel button

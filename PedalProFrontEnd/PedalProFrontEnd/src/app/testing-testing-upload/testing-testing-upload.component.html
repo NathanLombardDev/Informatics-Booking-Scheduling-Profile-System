@@ -1,0 +1,37 @@
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<div class="wholecontainer">
+    <mat-icon routerLink="/ViewAccount" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    <br/>
+    <h2 class="mb-4" style="color: black;">Upload/Update your profile picture</h2>
+    <br/>
+    <input type="file" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #fileInput />
+    <button class="file-input-label" (click)="fileInput.click()" #choose>
+      Choose Image
+    </button>
+    
+    <button id="submit" (click)="uploadImage()" [disabled]="!selectedFile">
+      Upload
+    </button>
+    <br/>
+    <span>{{ selectedFile?.name }}</span>
+</div>
+
+<div class="modal" id="myModal" style="display: none;" >
+    <div class="modal-dialog" id="Dialog">
+      <div class="modal-content" id="Content">
+        <div class="modal-body" id="modalBody">
+          <h4>Your profile picture has been uploaded/updated!</h4>
+          <br/>
+          <button type="button" class="btn btn-danger"  (click)="cancel_continue()"id="continue">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+

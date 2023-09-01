@@ -8,6 +8,11 @@ import { NgModule } from '@angular/core';
 import { Bicycle } from '../../Models/bicycle';
 import { BicycleBrand } from '../../Models/bicycle-brand';
 import { BicycleCategory } from '../../Models/bicycle-category';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
+import { BrandTwo } from 'src/app/Models/brand-two';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
+
 
 @Component({
   selector: 'app-view-bicycle',
@@ -15,16 +20,21 @@ import { BicycleCategory } from '../../Models/bicycle-category';
   styleUrls: ['./view-bicycle.component.css']
 })
 export class ViewBicycleComponent implements OnInit{
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){}
+  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient,private dialog:MatDialog){}
   modules:TrainingModule[]=[];
   
   bicycles:Bicycle[]=[];
   category:BicycleCategory[]=[];
-  brand:BicycleBrand[]=[];
+  brand:BrandTwo[]=[];
+  clientDetails: any;
+  cartnumber:any;
 
   ngOnInit(): void {
     this.GetBicycles();
     this.GetModules();
+    const storedCartQuantity = localStorage.getItem('cartQuantity');
+    this.cartnumber = storedCartQuantity ? parseInt(storedCartQuantity, 10) : 0;
+    this.fetchClientDetails();
   }
   // get modules method
   GetModules(){
@@ -67,34 +77,72 @@ export class ViewBicycleComponent implements OnInit{
   }
 
   GetBrand(id: any) {
-    const brands = this.brand.find(m => m.bicycleBrandId === id);
+    const brand = this.brand.find(m => m.bicycleBrandId === id);
   
-    if (brands) {
-      return brands.brandName;
+    if (brand) {
+      return brand.brandName;
     } else {
-      this.service.GetBicycleBrand(id).subscribe(result => {
-        this.brand.push(result);
-        return result.brandName;
+      this.service.GetBicycleBrandTwo(id).subscribe(result => {
+        const brandImageId = result.brandImageId;
+        this.service.GetBicycleBrandImage(brandImageId).subscribe(imageResult => {
+          result.brandName = imageResult.imageUrl; // Add brandImgName to the brand
+          this.brand.push(result);
+          return this.brand;
+        });
       });
-    }
   
-    // add a return statement here to handle the case where the module is not found
-    return 'Brand does not exist';
+      return 'Brand does not exist';
+    }
+  }
+
+  fetchClientDetails() {
+    this.service.getClientDetails().subscribe(
+      (response) => {
+        this.clientDetails = response;
+      },
+      (err)=>{
+        const errorMessage = err.error || 'An error occurred';
+        this.openErrorDialog(errorMessage);
+      }
+    );
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   DeleteBicycle(id:any)
   {
-    this.service.DeleteBicycle(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.bicycles.findIndex((bicycle)=>bicycle.bicycleId===id);
-        if(index!=-1){
-          this.bicycles.slice(index,1);
-        }
-        this.openModal();
-        
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete your bicylce?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+    
+    dialogRef.afterClosed().subscribe((result) =>{
+      if (result) {
+        this.service.DeleteBicycle(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.bicycles.findIndex((bicycle)=>bicycle.bicycleId===id);
+            if(index!=-1){
+              this.bicycles.slice(index,1);
+            }
+            this.openModal();
+          },
+          error:(err)=>{
+            const errorMessage=err.error|| 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
       }
-    })
+    });
+    
   }
 
   ReloadPage()

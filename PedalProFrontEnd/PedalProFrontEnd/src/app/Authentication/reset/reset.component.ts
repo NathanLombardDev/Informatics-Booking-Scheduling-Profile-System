@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
 import { Location } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
 
 
 @Component({
@@ -17,6 +19,7 @@ export class ResetComponent implements OnInit{
 
   constructor(
     private formBuilder: FormBuilder,
+    private dialog:MatDialog,
     private route: ActivatedRoute,
     private router: Router,
     private service: PedalProServiceService,private location: Location
@@ -60,12 +63,19 @@ export class ResetComponent implements OnInit{
           this.router.navigate(['/login']);
         },
         error => {
-          this.errorMessage = error.error;
+          const errorsMessage = error.error;
+          this.openErrorDialog(errorsMessage);
         }
       );
   }
 
   goBack(): void {
     this.location.back();
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 }

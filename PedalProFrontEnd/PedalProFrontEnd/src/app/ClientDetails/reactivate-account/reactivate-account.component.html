@@ -1,0 +1,33 @@
+<br/>
+<br/>
+<br/>
+<div class="wholecontainer">
+    <h2>Re-activate your account</h2>
+    <small>Please enter your details</small>
+    <form class="login-form" (ngSubmit)="onLogin()">
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" [(ngModel)]="email" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" [(ngModel)]="password" required>
+      </div>
+      <br/>
+      <button type="submit" id="submit">Login</button>
+    </form>
+    
+</div>
+<div class="modal" id="myModal" style="display: none;" >
+  <div class="modal-dialog" id="Dialog">
+    <div class="modal-content" id="Content">
+      
+      <div class="modal-body" id="modalBody">
+        <h4>Your account has been re-activated</h4>
+        <br/>
+        <button  type="button" class="btn btn-success" id="continue"  (click)="cancel_continue()" #continue>Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+

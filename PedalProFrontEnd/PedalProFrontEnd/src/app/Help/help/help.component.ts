@@ -4,7 +4,9 @@ import { Router } from '@angular/router';
 import { Help } from 'src/app/Models/help';
 import { HelpCatergory } from 'src/app/Models/help-catergory';
 import { PedalProServiceService } from 'src/app/Services/pedal-pro-service.service';
-
+import { MatDialog } from '@angular/material/dialog';
+import { ErrorDialogComponent } from 'src/app/Dialogs/error-dialog/error-dialog.component';
+import { DeleteDialogComponent,MyDialogData } from 'src/app/Dialogs/delete-dialog/delete-dialog.component';
 @Component({
   selector: 'app-help',
   templateUrl: './help.component.html',
@@ -26,7 +28,7 @@ export class HelpComponent implements OnInit{
   matHelpCategories:HelpCatergory[]=[];
   
 
-  constructor(private service:PedalProServiceService,private router:Router, private http:HttpClient){
+  constructor(private dialog:MatDialog,private service:PedalProServiceService,private router:Router, private http:HttpClient){
     
   }
 
@@ -46,6 +48,12 @@ export class HelpComponent implements OnInit{
     
     return this.helps;
     
+  }
+
+  openErrorDialog(errorMessage: string): void {
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: errorMessage }
+    });
   }
 
   //filter for search
@@ -80,17 +88,35 @@ export class HelpComponent implements OnInit{
   //delete function
   DeleteHelp(id:any)
   {
-    this.service.DeleteHelp(id).subscribe({
-      next:(response)=>{
-        
-        const index=this.helps.findIndex((help)=>help.helpId===id);
-        if(index!=-1){
-          this.helps.slice(index,1);
-        }
-        this.openModal();
-        
-      }
-    })
+    const dialogData: MyDialogData = {
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this help information?'
+    };
+
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      data: dialogData
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {  
+        this.service.DeleteHelp(id).subscribe({
+          next:(response)=>{
+            
+            const index=this.helps.findIndex((help)=>help.helpId===id);
+            if(index!=-1){
+              this.helps.slice(index,1);
+            }
+            this.openModal();
+            
+          },
+          error:(err)=>{
+            const errorMessage = err.error || 'An error occurred';
+            this.openErrorDialog(errorMessage);
+          }
+        })
+       }
+    });
+    
+    
   }
 
   ReloadPage()

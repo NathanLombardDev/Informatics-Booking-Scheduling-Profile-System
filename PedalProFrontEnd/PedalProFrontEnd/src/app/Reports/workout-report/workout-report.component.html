@@ -1,0 +1,59 @@
+<br/>
+
+
+<div class="report-container">
+    <mat-icon routerLink="/clientLanding" aria-label="Back" id="back">keyboard_backspace</mat-icon>
+    <h1>Workout Report</h1>
+      
+    <div class="interval-selector">
+        <label for="timeInterval">Select Time Interval:</label>
+        <select id="timeInterval" [(ngModel)]="selectedTimeInterval" (ngModelChange)="onTimeIntervalChange()">
+          <option value="last_month">Last Month</option>
+          <option value="last_three_months">Last Three Months</option>
+          <option value="last_six_months">Last Six Months</option>
+        </select>
+      </div>
+      
+    <button id="submit" (click)="generatePDF()">Generate PDF</button>
+    <br/>
+    <h4>Preview:</h4>
+    <div  style="margin-top: 20px; padding: 20px; border: 1px solid #ccc; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); background-color: white;">
+    <div id="report-content" class="report-content" style="margin-top: 20px;">
+        
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <img src="assets/CBT.jpg" style="width: 50px; margin-right: 10px; float: left;" />
+            <em style="font-size: 18px; text-align: center; display: inline-block; margin: 0 auto;"><b>Callan's Bike Tech</b></em>
+            <img src="assets/pedal.png" style="width: 50px; margin-left: 10px; float: right;" />
+          </div>
+        <br/>
+        <br/>
+        <br/>
+        <h4 style="font-size: 24px; text-align: center;">My Workout Data</h4>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+          <thead>
+            <tr style="background-color: #f2f2f2;">
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Date</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Duration</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Heart Rate(bpm)</th>
+              <th style="border: 1px solid #ccc; padding: 8px; text-align: left;">Distance</th>
+              <!-- Add other column headers as needed -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let workout of reportData.workoutData" style="border: 1px solid #ccc;">
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ workout.workoutDate | date }}</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ workout.duration }}hrs</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ workout.heartRate }}</td>
+              <td style="border: 1px solid #ccc; padding: 8px; text-align: left;">{{ workout.distance }}km</td>
+              <!-- Add other columns here -->
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 10px;">Total Duration: {{ reportData.totalDuration }}hrs</p>
+        <p>Average Duration: {{ reportData.averageDuration }}hrs</p>
+        <p>Total Distance: {{ reportData.totalDistance }}km</p>
+        <p>Average Distance: {{ reportData.averageDistance | number:'1.2-2' }}km</p>
+        <p>Average HeartRate: {{ reportData.averageHeartRate }}(bpm)</p>
+      </div>
+    </div>
+</div>

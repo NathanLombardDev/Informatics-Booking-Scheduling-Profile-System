@@ -15,6 +15,10 @@ namespace PedalProAPI.Models
         [Unicode(false)]
         public string? BookingTypeName { get; set; }
 
+
+        [Column("BookingTypePrice")]
+        public double? BookingTypePrice { get; set; }
+
         /*
         [InverseProperty("BookingType")]
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();

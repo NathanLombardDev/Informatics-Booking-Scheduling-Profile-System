@@ -10,16 +10,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            User roles
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="/pedalprorole" >View Roles</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="/pedalprorole/add">Add role</a></li>
-          </ul>
-        </li>
+        
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Clients
@@ -130,9 +121,18 @@
             Reports
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="" >Report 1</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PackageReport" >Package Report</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="">Report 2</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PopularDaysReport">Popular Booking Days Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/RevenueReport">Revenue Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/PackageListReport">Package List Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/ClientListReport">Client List Report</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/StaffReport">Staff Report</a></li>
+            
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -140,9 +140,7 @@
             Other
           </a>
           <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="nav-link active" aria-current="page" routerLink="" >Backup Database</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="nav-link active" aria-current="page" routerLink="">Restore Database</a></li>
+            <li><a class="nav-link active" aria-current="page" routerLink="/RestoreDatabase">Restore Database</a></li>
             <li><hr class="dropdown-divider"></li>
           <li><a class="nav-link active" aria-current="page" routerLink="/view-managehelp">View Manage Help</a></li>
           <li><hr class="dropdown-divider"></li>
@@ -159,7 +157,7 @@
   </div>
   
 </nav>
-    
+    <br/>
       <div class="row">
         <div class="col-5">
     
@@ -167,9 +165,9 @@
           
         </div>
         <div class="col-6">
+          <div class="wholecontainer">
           <br/>
           <h2>Update Employee</h2>
-          <br/>
           <form #form="ngForm" (ngSubmit)="UpdateEmployee()">
               <div class="mb-3">
                   <label for="Title" class="form-label" style="font-size: 16px;">Title</label>
@@ -261,9 +259,10 @@
                     </small>
                   </div>
             
-            <button type="submit" class="btn btn-success" style="margin-right: 6px;">Submit</button>
-            <button type="button" class="btn btn-danger" (click)="cancel_continue()">Cancel</button>
+            <button type="submit" id="submit" class="btn btn-success" style="margin-right: 6px;">Submit</button>
+            <button type="button" id="cancel" class="btn btn-danger" (click)="cancel_continue()">Cancel</button>
           </form>
+          </div>
         </div>
     
         <div class="col-1">

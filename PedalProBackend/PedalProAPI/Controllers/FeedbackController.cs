@@ -38,11 +38,11 @@ namespace PedalProAPI.Controllers
         }
 
         [HttpGet]
-        [Route("GetAllFeedbacks")]
-        public async Task<IActionResult> GetAllFeedbacks()
+        [Route("GetAllFeedback")]
+        public async Task<IActionResult> GetAllFeedback()
         {
-            var bookingTypes = await _repository.GetAllFeedbackAsync();
-            return Ok(bookingTypes);
+            var feedbacks = await _repository.GetAllFeedbackAsync();
+            return Ok(feedbacks);
         }
 
         [HttpGet]
@@ -61,22 +61,75 @@ namespace PedalProAPI.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("ProvideFeedback")]
+        [Authorize(Roles = "Client")]
+        public async Task<IActionResult> ProvideFeedback(FeedbackViewModel feedbackAdd)
+        {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return BadRequest("Username not found.");
+            }
+
+            var user = _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            var userId = user.Id;
+
+            var userClaims = User.Claims;
+
+            //bool hasAdminRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            //bool hasEmployeeRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Employee");
+            bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
+
+            if (!hasClientRole)
+            {
+                return Forbid("You do not have the necessary role to perform this action.");
+            }
+
+            var feedback = new Feedback
+            {
+                FeedbackDescription = feedbackAdd.FeedbackDescription,
+                FeedbackRating = feedbackAdd.FeedbackRating,
+                FeedbackCategoryId = feedbackAdd.FeedbackCategoryId,
+            };
+
+            try
+            {
+                _repository.Add(feedback);
+                await _repository.SaveChangesAsync();
+
+            }
+            catch (Exception)
+            {
+                return BadRequest("Invalid transaction");
+            }
+
+            return Ok(feedback);
+        }
+
         [HttpGet]
         [Route("GetAllFeedbackCategories")]
         public async Task<IActionResult> GetAllFeedbackCategories()
         {
-            var bookingTypes = await _repository.GetAllFeedbackCategoriesAsync();
-            return Ok(bookingTypes);
+            var feedbackCategories = await _repository.GetAllFeedbackCategoriesAsync();
+            return Ok(feedbackCategories);
         }
 
         [HttpGet]
-        [Route("GetFeedbackCategory/{feedbacCategorykId}")]
-        public async Task<IActionResult> GetFeedbackCategory(int feedbacCategorykId)
+        [Route("GetFeedbackCategory/{feedbackCategoryId}")]
+        public async Task<IActionResult> GetFeedbackCategory(int feedbackCategoryId)
         {
             try
             {
-                var result = await _repository.GetFeedbackCategoryAsync(feedbacCategorykId);
-                if (result == null) return NotFound("Feedback category does not exist");
+                var result = await _repository.GetFeedbackCategoryAsync(feedbackCategoryId);
+                if (result == null) return NotFound("Category does not exist");
                 return Ok(result);
             }
             catch (Exception)
@@ -84,85 +137,5 @@ namespace PedalProAPI.Controllers
                 return StatusCode(500, "Internal Server Error. Please contact support.");
             }
         }
-
-        [HttpPost]
-        [Route("ProvideFeedback")]
-        [Authorize(Roles = "Client")]
-        public async Task<IActionResult> ProvideFeedback(FeedbackViewModel cvm)
-        {
-
-           
-
-            try
-            {
-                var username = User.FindFirst(ClaimTypes.Name)?.Value;
-
-                if (string.IsNullOrEmpty(username))
-                {
-                    return BadRequest("Username not found.");
-                }
-
-                var user = await _userManager.FindByNameAsync(username);
-
-                if (user == null)
-                {
-                    return BadRequest("User not found.");
-                }
-
-                var userId = user.Id;
-
-                var client = await _repository.GetClient(userId);
-
-                if (client == null)
-                {
-                    return BadRequest("Client not found.");
-                }
-
-                var userClaims = User.Claims;
-                bool hasClientRole = userClaims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Client");
-
-                if (!hasClientRole)
-                {
-                    return Forbid("You do not have the necessary role to perform this action.");
-                }
-
-                var bookingType = new Feedback { FeedbackCategoryId = cvm.FeedbackCategoryId, FeedbackDescription = cvm.FeedbackDescription, FeedbackRating = cvm.FeedbackRating,ClientId=client.ClientId};
-
-                _repository.Add(bookingType);
-                await _repository.SaveChangesAsync();
-
-                return Ok(bookingType);
-            }
-            catch (Exception)
-            {
-                return BadRequest("Invalid transaction");
-            }
-
-            
-        }
-
-        [HttpGet]
-        public ActionResult<IEnumerable<FeedbackCategory>> GetFeedbackTypes()
-        {
-            var feedbackTypes = _context.FeedbackCategories;
-            return Ok(feedbackTypes);
-        }
-
-        // POST: api/Feedback
-        [HttpPost]
-        public ActionResult<Feedback> PostFeedback(Feedback feedback)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid data.");
-            }
-
-            _context.Feedbacks.Add(feedback);
-            _context.SaveChanges();
-
-            return Ok(feedback);
-        }
-
-
     }
 }
